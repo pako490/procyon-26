@@ -13,3 +13,43 @@ model User {
   name  String
   email String @unique
 }
+
+model Rubric {
+    id Int @id @default(autoincrement())
+    assignedDesignerId Int
+    title String
+    publishDate DateTime?
+    deprecationDate DateTime? 
+    replacementRubricId Int?
+    maxScoreComputed Int
+    lowQualThreshold Int
+    highQualThreashold Int
+    sampleURL String
+    
+    sections Section[]
+}
+
+model Section {
+    id Int @id @default(autoincrement())
+    heading String
+    assignedRubricId Int 
+    questions Question[]
+    
+    rubric Rubric @relation(fields: [assignedRubricId], references: [id])
+}
+
+model Question {
+    id Int @id @default(autoincrement())
+    question String
+    explanation String
+    assignedSectionId Int
+
+    section Section @relation(fields: [assignedSectionId], references: [id])
+}
+
+model RubricDesigner {
+    designerId Int @id @default(autoincrement())
+    name String
+    email String 
+    password String
+}
