@@ -4,6 +4,7 @@ generator client {
   output   = "../generated/prisma"
 }
 
+//NOTE: if u have the prisma extension it will flag an error here for not having a URL, you can ignore it 
 datasource db {
   provider = "postgresql"
 }

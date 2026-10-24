@@ -1,3 +1,9 @@
+import express from "express"
+import cors from "cors"
+
+const app = express()
+import { prisma } from "../lib/prisma.js";
+
 // Retrieve users
 app.get("/api/users", async (_req, res) => {
     try {
