@@ -27,8 +27,8 @@ coverage/
 # ==========================================
 # Prisma
 # ==========================================
-server/generated/
-server/src/generated/
+RASER/server/generated/
+RASER/server/src/generated/
 
 # ==========================================
 # Logs

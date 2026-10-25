@@ -24,7 +24,7 @@ model Rubric {
     replacementRubricId Int?
     maxScoreComputed Int
     lowQualThreshold Int
-    highQualThreashold Int
+    highQualThreshold Int
     sampleURL String
     
     sections Section[]
