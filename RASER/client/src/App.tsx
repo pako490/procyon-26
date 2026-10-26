@@ -2,6 +2,11 @@
 import { useEffect, useState } from "react";
 import api from "./api/axios";
 import CreateRubric from "./components/CreateRubric";
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
+
+import HomePage from "./pages/HomePage";
+import DesignerLogin from "./pages/DesignerLogin";
+import YourRubrics from "./pages/YourRubrics";
 
 interface User {
   id: number;
@@ -53,7 +58,16 @@ function App() {
 
   return (
     <>
-      <div>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/designer-login" element={<DesignerLogin />} />
+          <Route path="/your-rubrics" element={<YourRubrics />} />
+          <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
+      </BrowserRouter>
+
+      {/* <div>
         <h1>User Management</h1>
 
         {error && <p role="alert">{error}</p>}
@@ -83,9 +97,8 @@ function App() {
             </li>
           ))}
         </ul>
-      </div>
+      </div> */}
 
-      <CreateRubric />
     </>
   );
 }
