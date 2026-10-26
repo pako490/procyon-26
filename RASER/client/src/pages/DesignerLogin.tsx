@@ -44,7 +44,7 @@ function DesignerLogin() {
                         placeholder="Enter Password"
                         required
                     />
-                    <button type="submit">Login</button>
+                    <button className="login-button" type="submit">Login</button>
                 </form>
             </section>
         </main>

@@ -18,21 +18,16 @@ app.get("/api/rubrics", async (_req, res) => {
 app.post("/api/rubrics", async (req, res) => {
     const { assignedDesignerId, 
             title,
-            maxScoreComputed,
             lowQualThreshold,
             highQualThreshold,
-            sampleURL
         } = req.body;
   
     if (
         !Number.isInteger(assignedDesignerId) ||
         typeof title !== "string" ||
         !title.trim() ||
-        !Number.isInteger(maxScoreComputed) ||
         !Number.isInteger(lowQualThreshold) ||
-        !Number.isInteger(highQualThreshold) ||
-        typeof sampleURL !== "string" ||
-        !sampleURL.trim()
+        !Number.isInteger(highQualThreshold)
     ) {
         res.status(400).json({ error: "Missing or invalid required rubric fields" });
         return;
@@ -43,10 +38,8 @@ app.post("/api/rubrics", async (req, res) => {
             data: {
                 assignedDesignerId,
                 title: title.trim(),
-                maxScoreComputed,
                 lowQualThreshold,
                 highQualThreshold,
-                sampleURL: sampleURL.trim(),
             },
         });
   

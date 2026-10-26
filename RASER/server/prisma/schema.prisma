@@ -22,10 +22,10 @@ model Rubric {
     publishDate DateTime?
     deprecationDate DateTime? 
     replacementRubricId Int?
-    maxScoreComputed Int
+    maxScoreComputed Int?
     lowQualThreshold Int
     highQualThreshold Int
-    sampleURL String
+    sampleURL String?
     
     sections Section[]
 }

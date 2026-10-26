@@ -4,13 +4,11 @@ import "../App.css";
 function YourRubrics() {
     return (
         <main className="your-rubrics">
-            <header className="your-rubrics-header">
+            <header className="rubrics-header">
                 <h1>Your Rubrics</h1>
-            </header>
+            </header> 
 
-            <section className="create-rubric-section">
-                <CreateRubric />
-            </section>
+            <CreateRubric />
     
             <section className="rubrics-list-section">
                 <p>Nothing to display. Create a rubric to get started.</p>

@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Rubric" ALTER COLUMN "maxScoreComputed" DROP NOT NULL,
+ALTER COLUMN "sampleURL" DROP NOT NULL;
