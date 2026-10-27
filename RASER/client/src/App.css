@@ -187,3 +187,15 @@ input, textarea {
   border: 1px solid #ccc;
   text-align: center;
 }
+
+.rubrics-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.rubrics-table th, .rubrics-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid #ccc;
+}
+
