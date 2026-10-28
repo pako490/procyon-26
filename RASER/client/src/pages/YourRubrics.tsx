@@ -1,35 +1,25 @@
 import CreateRubric from "../components/CreateRubric";
+import RubricsTable, { type RubricsTableRef } from "../components/RubricsTable";
+import { useRef } from "react";
 import "../App.css";
 
+
 function YourRubrics() {
+    const tableRef = useRef<RubricsTableRef>(null);
+
+
     return (
         <main className="your-rubrics">
             <header className="rubrics-header">
                 <h1>Your Rubrics</h1>
             </header> 
 
-            <CreateRubric />
+            <CreateRubric
+                onRubricCreated={() => tableRef.current?.refresh()}
+            />
     
-            <section className="rubrics-list-section">
-                <table className="rubrics-table">
-                    <thead>
-                        <tr>
-                            <th>Title</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        {/* list rubrics here */}
-                    </tbody>
-                </table>
-
-                <br/>
-                <p>Nothing to display. Create a rubric to get started.</p>
-            </section>
+            <RubricsTable ref={tableRef}/> 
         </main>
-    )
-}
+    )};
 
 export default YourRubrics;

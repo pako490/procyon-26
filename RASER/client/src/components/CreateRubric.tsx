@@ -11,8 +11,12 @@ interface Rubric {
     sampleURL: string;
 }
 
-function CreateRubric() {
-    const [assignedDesignerId, setAssignedDesignerId] = useState<number | "">("");
+interface CreateRubricProps {
+    onRubricCreated: () => void | Promise<void>;
+}
+
+function CreateRubric({ onRubricCreated }: CreateRubricProps) {
+    const [assignedDesignerId, setAssignedDesignerId] = useState<number | "">(""); //TODO: Remove this 
     const [title, setTitle] = useState("");
     const [lowQualThreshold, setLowQualThreshold] = useState<number | "">("");
     const [highQualThreshold, setHighQualThreshold] = useState<number | "">("");
@@ -44,7 +48,7 @@ function CreateRubric() {
         }
 
         try {
-            const response = await api.post<Rubric>("/rubrics", {
+            const response = await api.post<Rubric>("/rubrics/create", {
                 assignedDesignerId,
                 title: title.trim(),
                 lowQualThreshold,
@@ -52,6 +56,10 @@ function CreateRubric() {
             });
 
             setSuccess(`Rubric "${response.data.title}" created successfully.`);
+
+
+            await onRubricCreated();
+
             setTitle("");
             setAssignedDesignerId("");
             setLowQualThreshold("");
