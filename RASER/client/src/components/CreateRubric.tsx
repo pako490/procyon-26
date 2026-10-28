@@ -11,7 +11,11 @@ interface Rubric {
     sampleURL: string | null;
 }
 
-function CreateRubric() {
+interface CreateRubricProps {
+    onRubricCreated: () => void | Promise<void>;
+}
+
+function CreateRubric({ onRubricCreated }: CreateRubricProps) {
     const [title, setTitle] = useState("");
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
@@ -32,6 +36,9 @@ function CreateRubric() {
             });
 
             setSuccess(`Rubric "${response.data.title}" created successfully.`);
+
+
+            await onRubricCreated();
             setTitle("");
         } catch (error) {
             console.error(error);
