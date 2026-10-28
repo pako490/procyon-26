@@ -173,7 +173,7 @@ router.patch("/deprecate/:id", async(req, res) => {
 })
 
 
-// Get all rubrics
+//================ Get All Rubric ================//
 router.get("/all", async (req, res) => {
     try {
         const rubrics = await prisma.rubric.findMany({
@@ -188,6 +188,27 @@ router.get("/all", async (req, res) => {
         return res.status(500).json({
             error: "Failed to retrieve rubrics"
         });
+    }
+});
+
+//================ Get MY Rubrics ================//
+router.get("/your/:id", async (req, res) => {
+
+    const id = Number(req.params.id);
+
+    try {
+        const rubrics = await prisma.rubric.findMany({
+            where: {
+                assignedDesignerId: id
+            },
+            orderBy: {
+                id: "asc"
+            }
+        })
+
+        return res.status(200).json(rubrics);
+    } catch(error) {
+        return res.status(500).json({error: "failed to retreive rubrics"});
     }
 });
 
