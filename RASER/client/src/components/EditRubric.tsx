@@ -6,7 +6,7 @@ import AddQuestionModal from "./AddQuestionModal";
 interface RubricQuestion {
     id: number;
     question: string;
-    explanation: string;
+    criteria: string;
 }
 
 interface RubricSection {
@@ -152,8 +152,8 @@ function EditRubric() {
                         }}
                         onBlur={(event) => saveField("title", event.target.value)}
                     />
-                    <p>Status: {rubric.publishDate ? "Published" : "Draft"}</p>
-                    <p>URL: {rubric.sampleURL || "Implement URL here."}</p>
+                    <p><strong>Status:</strong> {rubric.publishDate ? "Published" : "Draft"}</p>
+                    <p><strong>URL:</strong> {rubric.sampleURL || "Implement URL here."}</p>
                 </div>
                 <div className="edit-rubric-thresholds">
                     <label htmlFor="low-threshold">Low Quality Threshold:</label>
@@ -192,7 +192,7 @@ function EditRubric() {
                 <thead>
                     <tr>
                         <th>Question</th>
-                        <th>Explanation</th>
+                        <th>Criteria</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -207,7 +207,7 @@ function EditRubric() {
                                 {section?.questions.map((question) => (
                                     <tr key={question.id}>
                                         <td>{question.question}</td>
-                                        <td>{question.explanation}</td>
+                                        <td>{question.criteria}</td>
                                         <td>
                                             <button type="button" disabled={Boolean(rubric.publishDate)}>
                                                 Edit (implement)

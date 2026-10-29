@@ -5,7 +5,7 @@ import api from "../api/axios";
 interface AddedQuestion {
     id: number;
     question: string;
-    explanation: string;
+    criteria: string;
     rating1Description: string;
     rating2Description: string;
     rating3Description: string;

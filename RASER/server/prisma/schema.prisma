@@ -42,7 +42,7 @@ model Section {
 model Question {
     id Int @id @default(autoincrement())
     question String
-    explanation String
+    criteria String
     rating1Description String @default("")
     rating2Description String @default("")
     rating3Description String @default("")

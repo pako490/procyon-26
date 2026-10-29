@@ -43,11 +43,11 @@ router.post("/add", async (req, res) => {
             return;
         }
 
-        // explanation is the display string, highest rating first
+        // criteria is the display string, highest rating first
         const newQuestion = await prisma.question.create({
             data: {
                 question: question.trim(),
-                explanation:
+                criteria:
                     `5 = ${rating5}; 4 = ${rating4}; 3 = ${rating3}; ` +
                     `2 = ${rating2}; 1 = ${rating1}`,
                 rating1Description: rating1,

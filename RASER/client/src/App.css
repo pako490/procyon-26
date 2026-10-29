@@ -220,6 +220,7 @@ input, textarea {
   gap: 10px;
 }
 .edit-rubric-thresholds { grid-template-columns: 1fr 72px; gap: 12px; }
+.edit-rubric-header label { font-weight: bold; }
 
 .save-status {
   min-height: 24px;
