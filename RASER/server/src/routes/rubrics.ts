@@ -1,12 +1,6 @@
 import { Router } from "express";
 import { prisma } from "../lib/prisma.js";
 
-<<<<<<< HEAD
-const router = Router()
-  
-//================ Create Rubric ================//
-// TODO: add section creation implementation
-=======
 const router = Router();
 
 const rubricSectionHeadings = [
@@ -18,7 +12,6 @@ const rubricSectionHeadings = [
 ];
 
 //================ Create Rubric (just title)================//
->>>>>>> 671772ff05fa29853947a7565abf7ab859d976b0
 router.post("/create", async (req, res) => {
     const { title } = req.body;
 
@@ -44,10 +37,6 @@ router.post("/create", async (req, res) => {
     }
 });
 
-<<<<<<< HEAD
-//================ Delete Rubric ================//
-router.delete("/delete/:id", async (req, res) => {
-=======
 //================ Edit Rubric (thresholds, title) ================//
 router.post("/edit/:id", async (req, res) => {
     const id = Number(req.params.id);
@@ -125,7 +114,6 @@ router.post("/edit/:id", async (req, res) => {
 
 //================ Delete Rubric ================//
 router.post("/delete/:id", async (req, res) => {
->>>>>>> 671772ff05fa29853947a7565abf7ab859d976b0
     const id = Number(req.params.id);
 
     if (!Number.isInteger(id) || id <= 0) {
@@ -181,13 +169,8 @@ router.get("/list", async (req, res) => {
 });
 
 
-<<<<<<< HEAD
-//================ Your RUBRICS ================//
-
-=======
 //================ Your RUBRICS================//
 // Open up a published single rubric
->>>>>>> 671772ff05fa29853947a7565abf7ab859d976b0
 router.get("/list/:id", async (req, res) => {
 
     const id = Number(req.params.id);
@@ -258,11 +241,7 @@ router.patch("/deprecate/:id", async(req, res) => {
 })
 
 
-<<<<<<< HEAD
-//================ Get All Rubrics ================//
-=======
 //================ Get All Rubrics (published and unpublished) ================//
->>>>>>> 671772ff05fa29853947a7565abf7ab859d976b0
 router.get("/all", async (req, res) => {
     try {
         const rubrics = await prisma.rubric.findMany({
