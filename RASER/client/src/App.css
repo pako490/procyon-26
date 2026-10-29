@@ -200,3 +200,37 @@ input, textarea {
   border-bottom: 1px solid #ccc;
 }
 
+.rubrics-table td:last-child button + button {
+  margin-left: 8px;
+}
+
+/* Edit Rubric */
+.edit-rubric-page { text-align: left; }
+.edit-rubric-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr 180px;
+  align-items: start;
+  gap: 28px;
+  margin-bottom: 12px;
+}
+.edit-rubric-title,
+.edit-rubric-thresholds {
+  display: grid;
+  align-items: center;
+  gap: 10px;
+}
+.edit-rubric-thresholds { grid-template-columns: 1fr 72px; gap: 12px; }
+
+.save-status {
+  min-height: 24px;
+  margin-bottom: 8px;
+  color: #555;
+  font-size: 14px;
+  text-align: right;
+}
+
+.edit-rubric-sections { text-align: center; }
+.edit-rubric-section-heading th { background: #dedede; }
+.edit-rubric-add-question td { border-bottom: 0; }
+
+

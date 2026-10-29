@@ -1,21 +1,18 @@
-import { Router, type RequestHandler } from "express";
+import { Router } from "express";
 import { prisma } from "../lib/prisma.js";
 
 const router = Router();
 
-// Retrieve rubrics
-router.get("/", async (_req, res) => {
-    try {
-        const rubrics = await prisma.rubric.findMany();
-        return res.status(200).json(rubrics);
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({ error: "Failed to fetch rubrics" });
-    }
-});
+const rubricSectionHeadings = [
+    "Introduction",
+    "Materials and Sourcing",
+    "Methodology and Reproducibility",
+    "Replication, risk of bias and Statistics",
+    "Reporting and Transparency",
+];
 
-// Create a new rubric
-const createRubric: RequestHandler = async (req, res) => {
+//================ Create Rubric (just title)================//
+router.post("/create", async (req, res) => {
     const { title } = req.body;
 
     if (typeof title !== "string" || !title.trim()) {
@@ -27,6 +24,9 @@ const createRubric: RequestHandler = async (req, res) => {
         const rubric = await prisma.rubric.create({
             data: {
                 title: title.trim(),
+                sections: {
+                    create: rubricSectionHeadings.map((heading) => ({ heading })),
+                },
             },
         });
 
@@ -35,12 +35,10 @@ const createRubric: RequestHandler = async (req, res) => {
         console.error(error);
         res.status(500).json({ error: "Failed to create rubric" });
     }
-};
+});
 
-router.post(["/", "/create"], createRubric);
-
-// Edit a rubric
-router.post("/:id", async (req, res) => {
+//================ Edit Rubric (thresholds, title) ================//
+router.post("/edit/:id", async (req, res) => {
     const id = Number(req.params.id);
 
     // validate id
@@ -60,8 +58,10 @@ router.post("/:id", async (req, res) => {
         (title !== undefined &&
             (typeof title !== "string" || !title.trim())) ||
         (lowQualThreshold !== undefined &&
+            lowQualThreshold !== null &&
             !Number.isInteger(lowQualThreshold)) ||
         (highQualThreshold !== undefined &&
+            highQualThreshold !== null &&
             !Number.isInteger(highQualThreshold))
     ) {
         res.status(400).json({ error: "Invalid rubric fields" });
@@ -89,6 +89,11 @@ router.post("/:id", async (req, res) => {
             return;
         }
 
+        if (existingRubric.publishDate) {
+            res.status(403).json({ error: "Published rubrics cannot be edited" });
+            return;
+        }
+
         // update existing rubric
         const updatedRubric = await prisma.rubric.update({
             where: { id },
@@ -107,8 +112,8 @@ router.post("/:id", async (req, res) => {
 });
 
 
-// Delete a rubric
-router.delete(["/:id", "/delete/:id"], async (req, res) => {
+//================ Delete Rubric ================//
+router.post("/delete/:id", async (req, res) => {
     const id = Number(req.params.id);
 
     if (!Number.isInteger(id) || id <= 0) {
@@ -165,26 +170,33 @@ router.get("/list", async (req, res) => {
 
 
 //================ Your RUBRICS================//
-
+// Open up a published single rubric
 router.get("/list/:id", async (req, res) => {
 
     const id = Number(req.params.id);
+    if (!Number.isInteger(id) || id <= 0) {
+        return res.status(400).json({ error: "Invalid rubric ID" });
+    }
 
     try {
-        const rubrics = await prisma.rubric.findMany({
-            where: {id },
+        const rubric = await prisma.rubric.findUnique({
+            where: { id },
             include: {
                 sections: {
                     include: {
                         questions: true
-                    }
+                    },
+                    orderBy: { id: "asc" },
                 }
             }
         });
-        return res.status(200).json(rubrics)
+        if (!rubric) {
+            return res.status(404).json({ error: "Rubric not found" });
+        }
+        return res.status(200).json(rubric);
     } catch (error) {
         console.error(error);
-        return res.status(500).json({error: "Failed to retrieve rubrics"});
+        return res.status(500).json({error: "Failed to retrieve rubric"});
     }
 });
 
@@ -229,7 +241,7 @@ router.patch("/deprecate/:id", async(req, res) => {
 })
 
 
-//================ Get All Rubric ================//
+//================ Get All Rubrics (published and unpublished) ================//
 router.get("/all", async (req, res) => {
     try {
         const rubrics = await prisma.rubric.findMany({
@@ -265,6 +277,35 @@ router.get("/your/:id", async (req, res) => {
         return res.status(200).json(rubrics);
     } catch(error) {
         return res.status(500).json({error: "failed to retreive rubrics"});
+    }
+});
+
+//================ Get A Rubric for Editing ================//
+router.get("/:id", async (req, res) => {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id) || id <= 0) {
+        return res.status(400).json({ error: "Invalid rubric ID" });
+    }
+
+    try {
+        const rubric = await prisma.rubric.findUnique({
+            where: { id },
+            include: {
+                sections: {
+                    include: { questions: true },
+                    orderBy: { id: "asc" },
+                },
+            },
+        });
+
+        if (!rubric) {
+            return res.status(404).json({ error: "Rubric not found" });
+        }
+
+        return res.status(200).json(rubric);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: "Failed to retrieve rubric" });
     }
 });
 

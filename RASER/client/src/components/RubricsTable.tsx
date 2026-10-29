@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
 import type { Ref } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../api/axios";
 
 interface Rubric {
@@ -19,6 +20,7 @@ interface RubricsTableProps {
 }
 
 function RubricsTable({ ref }: RubricsTableProps) {
+    const navigate = useNavigate();
     const [rubrics, setRubrics] = useState<Rubric[]>([]);
     const [view, setView] = useState<RubricView>("all");
     const [error, setError] = useState<string | null>(null);
@@ -127,13 +129,21 @@ function RubricsTable({ ref }: RubricsTableProps) {
                             <td>{rubric.publishDate ? "Published" : "Draft"}</td>
                             <td>
                                 {!rubric.publishDate && (
-                                    <button
-                                        type="button"
-                                        onClick={() => void handlePublish(rubric.id)}
-                                        disabled={publishingId !== null}
-                                    >
-                                        {publishingId === rubric.id ? "Publishing..." : "Publish"}
-                                    </button>
+                                    <>
+                                        <button
+                                            type="button"
+                                            onClick={() => navigate(`/your-rubrics/${rubric.id}/edit`)}
+                                        >
+                                            Edit
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => void handlePublish(rubric.id)}
+                                            disabled={publishingId !== null}
+                                        >
+                                            {publishingId === rubric.id ? "Publishing..." : "Publish"}
+                                        </button>
+                                    </>
                                 )}
                             </td>
                         </tr>

@@ -31,7 +31,7 @@ function CreateRubric({ onRubricCreated }: CreateRubricProps) {
         }
 
         try {
-            const response = await api.post<Rubric>("/rubrics", {
+            const response = await api.post<Rubric>("/rubrics/create", {
                 title: title.trim()
             });
 
