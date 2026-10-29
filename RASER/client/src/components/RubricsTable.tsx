@@ -149,16 +149,6 @@ function RubricsTable({ ref }: RubricsTableProps) {
                             <td>{rubric.publishDate ? "Published" : "Draft"}</td>
                             <td>
                                 {!rubric.publishDate && (
-<<<<<<< HEAD
-                                    <button
-                                        type="button"
-                                        onClick={() => void handlePublish(rubric.id)}
-                                        disabled={publishingId !== null}
-                                        className="action-button"
-                                    >
-                                        {publishingId === rubric.id ? "Publishing..." : "Publish"}
-                                    </button>
-=======
                                     <>
                                         <button
                                             type="button"
@@ -174,7 +164,6 @@ function RubricsTable({ ref }: RubricsTableProps) {
                                             {publishingId === rubric.id ? "Publishing..." : "Publish"}
                                         </button>
                                     </>
->>>>>>> 671772ff05fa29853947a7565abf7ab859d976b0
                                 )}
 
                                 {!rubric.publishDate && (
