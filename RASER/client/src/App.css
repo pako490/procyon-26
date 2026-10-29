@@ -200,3 +200,47 @@ input, textarea {
   border-bottom: 1px solid #ccc;
 }
 
+.no-rubrics-message {
+  padding: 20px;
+}
+
+.action-button {
+  margin-right: 8px;
+}
+
+.refresh-button {
+  margin-top: 14px;
+}
+
+.rubrics-view-slider {
+  display: flex;
+  gap: 12px;
+}
+
+.rubrics-table-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.rubrics-table-controls button {
+  padding: 10px 20px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background-color: white;
+  color: #374151;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.rubrics-table-controls button:hover {
+  background-color: #f3f4f6;
+}
+
+.rubrics-table-controls button.active {
+  background-color: #e3e1e1;
+}
+

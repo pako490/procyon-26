@@ -24,6 +24,7 @@ function RubricsTable({ ref }: RubricsTableProps) {
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [publishingId, setPublishingId] = useState<number | null>(null);
+    const [deletingId, setDeletingId] = useState<number | null>(null);
 
     // Prevent an older response from overwriting a newer view or refresh.
     const requestId = useRef(0);
@@ -79,6 +80,25 @@ function RubricsTable({ ref }: RubricsTableProps) {
         }
     };
 
+    const handleDelete = async (id: number, title: string) => {
+        const confirmation = window.confirm(`Delete rubric ${title}? Action cannot be undone.`);
+
+        if (!confirmation) return;
+
+        setDeletingId(id);
+        setError(null);
+
+        try {
+            await api.delete(`/rubrics/delete/${id}`);
+            await refreshRubrics();
+        } catch (err) {
+            console.error(`Failed DELETE /rubrics/delete/${id}:`, err);
+            setError(`Failed to delete rubric ${title}.`);
+        } finally {
+            setDeletingId(null);
+        }
+    }
+
     return (
         <section className="rubrics-list-section">
             <div className="rubrics-table-controls">
@@ -131,8 +151,20 @@ function RubricsTable({ ref }: RubricsTableProps) {
                                         type="button"
                                         onClick={() => void handlePublish(rubric.id)}
                                         disabled={publishingId !== null}
+                                        className="action-button"
                                     >
                                         {publishingId === rubric.id ? "Publishing..." : "Publish"}
+                                    </button>
+                                )}
+
+                                {!rubric.publishDate && (
+                                    <button
+                                        type="button"
+                                        onClick={() => void handleDelete(rubric.id, rubric.title)}
+                                        disabled={deletingId !== null}
+                                        className="action-button"
+                                    >
+                                        {deletingId === rubric.id ? "Deleting..." : "Delete"}
                                     </button>
                                 )}
                             </td>
@@ -143,7 +175,7 @@ function RubricsTable({ ref }: RubricsTableProps) {
 
             {loading && <p>Loading rubrics...</p>}
             {!loading && !error && rubrics.length === 0 && (
-                <p>{view === "all"
+                <p className="no-rubrics-message">{view === "all"
                     ? "Nothing to display. Create a rubric to get started."
                     : "No published rubrics to display."}</p>
             )}

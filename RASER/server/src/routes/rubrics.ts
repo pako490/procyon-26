@@ -2,19 +2,8 @@ import {Router} from "express"
 import { prisma } from "../lib/prisma.js";
 
 const router = Router()
-
-// // Retrieve rubrics
-// app.get("/api/rubrics", async (_req, res) => {
-//     try {
-//         const rubrics = await prisma.rubric.findMany();
-//         res.json(rubrics);
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).json({ error: "Failed to fetch rubrics" });
-//     }
-// });
   
-// Create a new rubric
+//================ Create Rubric ================//
 // TODO: add section creation implementation
 router.post("/create", async (req, res) => {
     const { assignedDesignerId, 
@@ -51,7 +40,7 @@ router.post("/create", async (req, res) => {
     }
 });
 
-// Delete a rubric
+//================ Delete Rubric ================//
 router.delete("/delete/:id", async (req, res) => {
     const id = Number(req.params.id);
 
@@ -79,7 +68,7 @@ router.delete("/delete/:id", async (req, res) => {
 }); 
 
 
-//================LIST Published RUBRICS================//
+//================ LIST Published RUBRICS ================//
 
 router.get("/list", async (req, res) => {
 
@@ -108,7 +97,7 @@ router.get("/list", async (req, res) => {
 });
 
 
-//================ Your RUBRICS================//
+//================ Your RUBRICS ================//
 
 router.get("/list/:id", async (req, res) => {
     
@@ -173,7 +162,7 @@ router.patch("/deprecate/:id", async(req, res) => {
 })
 
 
-//================ Get All Rubric ================//
+//================ Get All Rubrics ================//
 router.get("/all", async (req, res) => {
     try {
         const rubrics = await prisma.rubric.findMany({
