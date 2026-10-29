@@ -17,14 +17,14 @@ model User {
 
 model Rubric {
     id Int @id @default(autoincrement())
-    assignedDesignerId Int
+    assignedDesignerId Int?
     title String
     publishDate DateTime?
     deprecationDate DateTime? 
     replacementRubricId Int?
     maxScoreComputed Int?
-    lowQualThreshold Int
-    highQualThreshold Int
+    lowQualThreshold Int?
+    highQualThreshold Int?
     sampleURL String?
     
     sections Section[]
