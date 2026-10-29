@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
 import type { Ref } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../api/axios";
 
 interface Rubric {
@@ -19,6 +20,7 @@ interface RubricsTableProps {
 }
 
 function RubricsTable({ ref }: RubricsTableProps) {
+    const navigate = useNavigate();
     const [rubrics, setRubrics] = useState<Rubric[]>([]);
     const [view, setView] = useState<RubricView>("all");
     const [error, setError] = useState<string | null>(null);
@@ -33,18 +35,18 @@ function RubricsTable({ ref }: RubricsTableProps) {
         const endpoint = selectedView === "all"
             ? "/rubrics/all"
             : "/rubrics/list";
-    
+
         console.log("Axios base URL:", api.defaults.baseURL);
         console.log("Request URL:", api.getUri({ url: endpoint }));
-    
+
         setLoading(true);
-    
+
         try {
             const response = await api.get<Rubric[]>(endpoint);
-    
+
             console.log("HTTP Status:", response.status);
             console.log("Received rubrics:", response.data);
-    
+
             setRubrics(response.data);
             setError(null);
         } catch (error) {
@@ -147,6 +149,7 @@ function RubricsTable({ ref }: RubricsTableProps) {
                             <td>{rubric.publishDate ? "Published" : "Draft"}</td>
                             <td>
                                 {!rubric.publishDate && (
+<<<<<<< HEAD
                                     <button
                                         type="button"
                                         onClick={() => void handlePublish(rubric.id)}
@@ -155,6 +158,23 @@ function RubricsTable({ ref }: RubricsTableProps) {
                                     >
                                         {publishingId === rubric.id ? "Publishing..." : "Publish"}
                                     </button>
+=======
+                                    <>
+                                        <button
+                                            type="button"
+                                            onClick={() => navigate(`/your-rubrics/${rubric.id}/edit`)}
+                                        >
+                                            Edit
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => void handlePublish(rubric.id)}
+                                            disabled={publishingId !== null}
+                                        >
+                                            {publishingId === rubric.id ? "Publishing..." : "Publish"}
+                                        </button>
+                                    </>
+>>>>>>> 671772ff05fa29853947a7565abf7ab859d976b0
                                 )}
 
                                 {!rubric.publishDate && (

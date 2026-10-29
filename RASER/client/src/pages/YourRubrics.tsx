@@ -12,13 +12,13 @@ function YourRubrics() {
         <main className="your-rubrics">
             <header className="rubrics-header">
                 <h1>Your Rubrics</h1>
-            </header> 
+            </header>
 
             <CreateRubric
                 onRubricCreated={() => tableRef.current?.refresh()}
             />
-    
-            <RubricsTable ref={tableRef}/> 
+
+            <RubricsTable ref={tableRef}/>
         </main>
     )};
 

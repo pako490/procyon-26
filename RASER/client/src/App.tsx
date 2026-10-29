@@ -4,6 +4,7 @@ import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import DesignerLogin from "./pages/DesignerLogin";
 import YourRubrics from "./pages/YourRubrics";
+import EditRubric from "./components/EditRubric";
 
 
 function App() {
@@ -15,6 +16,7 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/designer-login" element={<DesignerLogin />} />
           <Route path="/your-rubrics" element={<YourRubrics />} />
+          <Route path="/your-rubrics/:rubricId/edit" element={<EditRubric />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </BrowserRouter>
