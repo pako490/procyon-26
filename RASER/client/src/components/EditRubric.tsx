@@ -1,6 +1,7 @@
 import { Fragment, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../api/axios";
+import AddQuestionModal from "./AddQuestionModal";
 
 interface RubricQuestion {
     id: number;
@@ -43,6 +44,9 @@ function EditRubric() {
     const [highQualThreshold, setHighQualThreshold] = useState("");
     const [loading, setLoading] = useState(true);
     const [loadError, setLoadError] = useState<string | null>(null);
+    
+    // section the Add Question popup is open for, null when closed
+    const [addingToSection, setAddingToSection] = useState<{ id: number; heading: string } | null>(null);
     const [saveMessage, setSaveMessage] = useState("");
     const saving = useRef<Promise<void>>(Promise.resolve());
 
@@ -204,13 +208,28 @@ function EditRubric() {
                                     <tr key={question.id}>
                                         <td>{question.question}</td>
                                         <td>{question.explanation}</td>
-                                        <td />
+                                        <td>
+                                            <button type="button" disabled={Boolean(rubric.publishDate)}>
+                                                Edit (implement)
+                                            </button>
+                                            <button type="button" disabled={Boolean(rubric.publishDate)}>
+                                                Delete (implement)
+                                            </button>
+                                        </td>
                                     </tr>
                                 ))}
                                 <tr className="edit-rubric-add-question">
                                     <td colSpan={3}>
-                                        <button type="button">
-                                            Add Question (implement)
+                                        <button
+                                            type="button"
+                                            disabled={Boolean(rubric.publishDate) || !section}
+                                            onClick={() => {
+                                                if (section) {
+                                                    setAddingToSection({ id: section.id, heading });
+                                                }
+                                            }}
+                                        >
+                                            Add Question
                                         </button>
                                     </td>
                                 </tr>
@@ -219,6 +238,25 @@ function EditRubric() {
                     })}
                 </tbody>
             </table>
+
+            {addingToSection && (
+                <AddQuestionModal
+                    sectionId={addingToSection.id}
+                    sectionHeading={addingToSection.heading}
+                    onSaved={(newQuestion) => {
+                        // show the new row right away, no refetch needed
+                        setRubric((current) => current && {
+                            ...current,
+                            sections: current.sections.map((section) =>
+                                section.id === addingToSection.id
+                                    ? { ...section, questions: [...section.questions, newQuestion] }
+                                    : section,
+                            ),
+                        });
+                    }}
+                    onClose={() => setAddingToSection(null)}
+                />
+            )}
         </main>
     );
 }
