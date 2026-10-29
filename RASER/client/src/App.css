@@ -233,6 +233,8 @@ input, textarea {
 .edit-rubric-sections { text-align: center; }
 .edit-rubric-section-heading th { background: #dedede; }
 .edit-rubric-add-question td { border-bottom: 0; }
+.edit-rubric-sections td:last-child button { display: block; margin: 0 auto; }
+.edit-rubric-sections td:last-child button + button { margin: 8px auto 0; }
 
 /* Add Question popup */
 .modal-backdrop {
