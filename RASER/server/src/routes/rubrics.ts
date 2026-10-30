@@ -174,7 +174,7 @@ router.get("/list", async (req, res) => {
             include: {
                 sections: {
                     include: {
-                        questions: true
+                        questions: { orderBy: { id: "asc" } }
                     }
                 }
             }
@@ -204,7 +204,7 @@ router.get("/list/:id", async (req, res) => {
             include: {
                 sections: {
                     include: {
-                        questions: true
+                        questions: { orderBy: { id: "asc" } }
                     },
                     orderBy: { id: "asc" },
                 }
@@ -312,7 +312,7 @@ router.get("/:id", async (req, res) => {
             where: { id },
             include: {
                 sections: {
-                    include: { questions: true },
+                    include: { questions: { orderBy: { id: "asc" } } },
                     orderBy: { id: "asc" },
                 },
             },

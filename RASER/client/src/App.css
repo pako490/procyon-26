@@ -279,6 +279,7 @@ input, textarea {
   gap: 10px;
 }
 .edit-rubric-thresholds { grid-template-columns: 1fr 72px; gap: 12px; }
+.edit-rubric-header label { font-weight: bold; }
 
 .save-status {
   min-height: 24px;
@@ -291,5 +292,37 @@ input, textarea {
 .edit-rubric-sections { text-align: center; }
 .edit-rubric-section-heading th { background: #dedede; }
 .edit-rubric-add-question td { border-bottom: 0; }
+.edit-rubric-sections td:last-child button { display: block; margin: 0 auto; }
+.edit-rubric-sections td:last-child button + button { margin: 8px auto 0; }
 
+/* Add Question popup */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.5);
+}
 
+.modal {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 24px;
+  border-radius: 8px;
+  background: #fff;
+  color: #222;
+  text-align: left;
+}
+
+.modal h2 { margin: 0 0 4px; font-size: 20px; }
+.modal-hint { margin: 0; color: #888; font-size: 14px; }
+.modal-rating { display: grid; gap: 4px; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 8px; }
+.modal .error-message { margin: 0; color: #b00020; font-size: 14px; }
