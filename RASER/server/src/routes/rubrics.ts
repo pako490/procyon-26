@@ -113,7 +113,7 @@ router.post("/edit/:id", async (req, res) => {
 
 
 //================ Delete Rubric ================//
-router.post("/delete/:id", async (req, res) => {
+router.delete("/delete/:id", async (req, res) => {
     const id = Number(req.params.id);
 
     if (!Number.isInteger(id) || id <= 0) {
@@ -129,9 +129,29 @@ router.post("/delete/:id", async (req, res) => {
             res.status(404).json({ error: "Rubric not found" });
             return;
         }
+
+        const sections = await prisma.section.findMany({
+            where: { assignedRubricId: id },
+            select: { id: true },
+        });
+
+        const sectionIds = sections.map((section) => section.id);
+
+        // Delete all questions associated with the sections
+        await prisma.question.deleteMany({
+            where: { assignedSectionId: { in: sectionIds } },
+        });
+
+        // Delete all sections associated with the rubric
+        await prisma.section.deleteMany({
+            where: { assignedRubricId: id },
+        });
+
+        // Delete the rubric itself
         await prisma.rubric.delete({
             where: { id },
         });
+
         res.status(204).end();
     } catch (error) {
         console.error(error);

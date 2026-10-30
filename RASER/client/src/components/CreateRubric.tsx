@@ -49,25 +49,24 @@ function CreateRubric({ onRubricCreated }: CreateRubricProps) {
     return (
         <section className="create-rubric-section">
             <h1>Create New Rubric</h1>
-            {error && <p className="error-message">{error}</p>}
-            {success && <p className="success-message">{success}</p>}
+            
 
             <form className="create-rubric-form" onSubmit={handleSubmit}>
                 <div className="form-grid">
-                    <div className="form-field">
-                        <label htmlFor="title">Rubric Title:</label>
-                        <input
-                            type="text"
-                            id="title"
-                            value={title}
-                            onChange={(e) => setTitle(e.target.value)}
-                            required
-                        />
-                    </div>
+                    <label htmlFor="title">Rubric Title:</label>
+                    <input
+                        type="text"
+                        id="title"
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        required
+                    />
+                    <button type="submit">Create Rubric</button>
                 </div>
-
-                <button type="submit">Create Rubric</button>
             </form>
+
+            {error && <p className="error-message">{error}</p>}
+            {success && <p className="success-message">{success}</p>}
         </section>
     )
 }
