@@ -17,15 +17,15 @@ model User {
 
 model Rubric {
     id Int @id @default(autoincrement())
-    assignedDesignerId Int
+    assignedDesignerId Int?
     title String
     publishDate DateTime?
     deprecationDate DateTime? 
     replacementRubricId Int?
-    maxScoreComputed Int
-    lowQualThreshold Int
-    highQualThreashold Int
-    sampleURL String
+    maxScoreComputed Int?
+    lowQualThreshold Int?
+    highQualThreshold Int?
+    sampleURL String?
     
     sections Section[]
 }
@@ -42,7 +42,12 @@ model Section {
 model Question {
     id Int @id @default(autoincrement())
     question String
-    explanation String
+    criteria String
+    rating1Description String @default("")
+    rating2Description String @default("")
+    rating3Description String @default("")
+    rating4Description String @default("")
+    rating5Description String @default("")
     assignedSectionId Int
 
     section Section @relation(fields: [assignedSectionId], references: [id])
