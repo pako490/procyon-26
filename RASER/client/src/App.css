@@ -324,5 +324,6 @@ input, textarea {
 .modal h2 { margin: 0 0 4px; font-size: 20px; }
 .modal-hint { margin: 0; color: #888; font-size: 14px; }
 .modal-rating { display: grid; gap: 4px; }
+.modal textarea { max-width: 100%; resize: vertical; }
 .modal-actions { display: flex; justify-content: flex-end; gap: 8px; }
 .modal .error-message { margin: 0; color: #b00020; font-size: 14px; }

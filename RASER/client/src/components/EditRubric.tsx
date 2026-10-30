@@ -1,12 +1,17 @@
 import { Fragment, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../api/axios";
-import AddQuestionModal from "./AddQuestionModal";
+import QuestionModal from "./QuestionModal";
 
 interface RubricQuestion {
     id: number;
     question: string;
     criteria: string;
+    rating1Description: string;
+    rating2Description: string;
+    rating3Description: string;
+    rating4Description: string;
+    rating5Description: string;
 }
 
 interface RubricSection {
@@ -47,6 +52,14 @@ function EditRubric() {
     
     // section the Add Question popup is open for, null when closed
     const [addingToSection, setAddingToSection] = useState<{ id: number; heading: string } | null>(null);
+    
+    // question the Edit Question popup is open for, null when closed
+    const [editingQuestion, setEditingQuestion] = useState<{
+        question: RubricQuestion;
+        sectionId: number;
+        heading: string;
+    } | null>(null);
+    
     const [saveMessage, setSaveMessage] = useState("");
     const saving = useRef<Promise<void>>(Promise.resolve());
 
@@ -209,8 +222,16 @@ function EditRubric() {
                                         <td>{question.question}</td>
                                         <td>{question.criteria}</td>
                                         <td>
-                                            <button type="button" disabled={Boolean(rubric.publishDate)}>
-                                                Edit (implement)
+                                            <button
+                                                type="button"
+                                                disabled={Boolean(rubric.publishDate)}
+                                                onClick={() => {
+                                                    if (section) {
+                                                        setEditingQuestion({ question, sectionId: section.id, heading });
+                                                    }
+                                                }}
+                                            >
+                                                Edit
                                             </button>
                                             <button type="button" disabled={Boolean(rubric.publishDate)}>
                                                 Delete (implement)
@@ -240,7 +261,7 @@ function EditRubric() {
             </table>
 
             {addingToSection && (
-                <AddQuestionModal
+                <QuestionModal
                     sectionId={addingToSection.id}
                     sectionHeading={addingToSection.heading}
                     onSaved={(newQuestion) => {
@@ -255,6 +276,31 @@ function EditRubric() {
                         });
                     }}
                     onClose={() => setAddingToSection(null)}
+                />
+            )}
+
+            {editingQuestion && (
+                <QuestionModal
+                    sectionId={editingQuestion.sectionId}
+                    sectionHeading={editingQuestion.heading}
+                    existingQuestion={editingQuestion.question}
+                    onSaved={(updatedQuestion) => {
+                        // swap the row in place, no refetch needed
+                        setRubric((current) => current && {
+                            ...current,
+                            sections: current.sections.map((section) =>
+                                section.id === editingQuestion.sectionId
+                                    ? {
+                                        ...section,
+                                        questions: section.questions.map((existing) =>
+                                            existing.id === updatedQuestion.id ? updatedQuestion : existing,
+                                        ),
+                                    }
+                                    : section,
+                            ),
+                        });
+                    }}
+                    onClose={() => setEditingQuestion(null)}
                 />
             )}
         </main>
