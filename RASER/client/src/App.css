@@ -140,42 +140,33 @@ input, textarea {
 .create-rubric-form {
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: 10px;
 }
 
 .form-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 24px 32px;
-  width: 100%;
-}
-
-.form-field {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 24px 32px;
+  width: 100%;
+  margin-left: 12px;
 }
 
-.form-field label {
-  flex: 0 0 180px;
+.form-grid label {
   font-size: 14px;
-  width: 180px;
   text-align: left;
 }
 
-.form-field input {
+.form-grid input {
   flex: 1;
   min-width: 0;
   width: 100%;
-  margin: 3px;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  margin: 0;
 }
 
-.create-rubric-form button {
-  margin-top: 10px;
+.form-grid button {
+  margin-right: 120px;
+  width: fit-content;
+  align-self: flex-start;
 }
 
 .rubrics-list-section {
@@ -193,13 +184,81 @@ input, textarea {
   width: 100%;
   border-collapse: collapse;
   text-align: left;
+  table-layout: fixed;
+}
+
+.rubrics-table th:nth-child(1), .rubrics-table td:nth-child(1) {
+  width: 35%;
+}
+
+.rubrics-table th:nth-child(2), .rubrics-table td:nth-child(2) {
+  width: 20%;
+}
+
+.rubrics-table th:nth-child(3), .rubrics-table td:nth-child(3) {
+  width: 45%;
 }
 
 .rubrics-table th, .rubrics-table td {
   padding: 14px 16px;
   border-bottom: 1px solid #ccc;
+  overflow-wrap: break-word;
 }
 
+.no-rubrics-message {
+  padding: 20px;
+  font-size: 14px;
+  font-style: italic;
+}
+
+.error-message, .success-message {
+  padding-top: 20px;
+  font-size: 14px;
+  font-style: italic;
+  color: #888;
+  margin-left: 12px;
+  overflow-wrap: break-word;
+}
+
+.action-button {
+  margin-right: 8px;
+}
+
+.refresh-button {
+  margin-top: 14px;
+}
+
+.rubrics-view-slider {
+  display: flex;
+  gap: 12px;
+}
+
+.rubrics-table-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.rubrics-table-controls button {
+  padding: 10px 20px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background-color: white;
+  color: #374151;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.rubrics-table-controls button:hover {
+  background-color: #f3f4f6;
+}
+
+.rubrics-table-controls button.active {
+  background-color: #e3e1e1;
+}
 .rubrics-table td:last-child button + button {
   margin-left: 8px;
 }
