@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, use, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../api/axios";
 import QuestionModal from "./QuestionModal";
@@ -49,6 +49,7 @@ function EditRubric() {
     const [highQualThreshold, setHighQualThreshold] = useState("");
     const [loading, setLoading] = useState(true);
     const [loadError, setLoadError] = useState<string | null>(null);
+    const [deletingId, setDeletingId] = useState<number | null>(null);
     
     // section the Add Question popup is open for, null when closed
     const [addingToSection, setAddingToSection] = useState<{ id: number; heading: string } | null>(null);
@@ -59,6 +60,9 @@ function EditRubric() {
         sectionId: number;
         heading: string;
     } | null>(null);
+
+
+
     
     const [saveMessage, setSaveMessage] = useState("");
     const saving = useRef<Promise<void>>(Promise.resolve());
@@ -90,8 +94,9 @@ function EditRubric() {
         };
     }, [rubricId]);
 
-    // validations for editing title and thresholds
+    // saving the editable fields
     function saveField(field: editable, value: string) {
+        // validations for editing title and thresholds
         const patchValue = field === "title"
             ? value.trim()
             : value === "" ? null : Number(value);
@@ -146,9 +151,39 @@ function EditRubric() {
         );
     }
 
+
     const sectionsByHeading = new Map(
         rubric.sections.map((section) => [section.heading, section]),
     );
+
+    const handleDelete = async (id: number) => {
+        const confirmation = window.confirm(`Delete this question? Action cannot be undone.`);
+
+        if (!confirmation) return;
+        setDeletingId(id);
+        
+        try {
+            await api.delete(`question/delete/${id}`);
+            // refresh display by copying new states for rubric/section and
+            // filtering questions whose id does not match the one that was just deleted
+            setRubric((current) => current && ({
+                ...current,
+                sections: current.sections.map((section) => ({
+                    ...section,
+                    questions: section.questions.filter(
+                        (question) => question.id !== id
+                    ),
+                })),
+            }));
+
+        } catch (error) {
+            console.error(`Failed to delete question ${id}:`, error);
+            setSaveMessage("Could not delete this question, try again.");
+        } finally {
+            setDeletingId(null);
+        }
+    }
+
 
     return (
         <main className="your-rubrics edit-rubric-page">
@@ -233,8 +268,12 @@ function EditRubric() {
                                             >
                                                 Edit
                                             </button>
-                                            <button type="button" disabled={Boolean(rubric.publishDate)}>
-                                                Delete (implement)
+                                            <button
+                                                type="button"
+                                                disabled={Boolean(rubric.publishDate)}
+                                                onClick={() => void handleDelete(question.id)}
+                                            >
+                                                {deletingId === question.id ? "Deleting..." : "Delete"}
                                             </button>
                                         </td>
                                     </tr>

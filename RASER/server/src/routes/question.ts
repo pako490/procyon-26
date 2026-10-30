@@ -111,7 +111,7 @@ router.post("/edit/:id", async (req, res) => {
         }
 
         if (existingQuestion.section.rubric.publishDate) {
-            res.status(403).json({ error: "Published rubrics cannot be edited" });
+            res.status(403).json({ error: "Questions in published rubrics cannot be edited" });
             return;
         }
 
@@ -135,5 +135,45 @@ router.post("/edit/:id", async (req, res) => {
         res.status(500).json({ error: "Failed to update question" });
     }
 });
+
+//================ Delete Question ================//
+router.delete("/delete/:id", async(req,res)=> {
+    const id = Number(req.params.id);
+    // validate id
+    if (!Number.isInteger(id) || id <= 0) {
+        res.status(400).json({ error: "Invalid question ID" });
+        return;
+    }
+
+    try {
+        // query db for question
+        const existingQuestion = await prisma.question.findUnique({
+            where: { id },
+            include: { section: { include: { rubric: true } } },
+        });
+
+
+        if (!existingQuestion) {
+            res.status(404).json({ error: "Question not found" });
+            return;
+        }
+
+        if (existingQuestion.section.rubric.publishDate) {
+            res.status(403).json({ error: "Questions in published rubrics cannot be deleted" });
+            return;
+        }
+
+        // delete from db
+        await prisma.question.delete({
+            where: {id}
+        })
+
+        res.status(204).end()
+
+    } catch(error){
+        console.error(error);
+        res.status(500).json({error: "Failed to delete question"})
+    }
+})
 
 export default router;
