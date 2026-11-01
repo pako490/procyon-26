@@ -1,0 +1,9 @@
+{
+  "app": "npx ts-node --prefer-ts-exts bin/raser.ts",
+  "context": {
+    "region": "us-east-2",
+    "vpcId": "vpc-0389a577ebab17a70",
+    "databaseSecurityGroupId": "sg-030a3715755c30d4e",
+    "databaseSecretName": "raser/prod/database-url"
+  }
+}

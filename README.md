@@ -157,6 +157,11 @@ If your database is empty and the example `/api/users` route is present, the end
 - Keep database credentials and other secrets out of source control.
 - AWS deployment is not required for local development.
 
+## AWS Deployment
+
+For CDK setup, existing-RDS networking, Secrets Manager configuration, and
+deployment commands, see [RASER/infra/README.md](RASER/infra/README.md).
+
 ## Suggested `.gitignore` Entries
 
 Ensure the repository ignores at least the following:
