@@ -1,3 +1,22 @@
+# Procyon Sprint #1
+
+# Use Cases Implemented:
+- Create Rubric
+- Edit Rubric
+- Delete Rubric
+- List Rubrics
+- Publish Rubric
+- Add Question
+- Edit Question
+- Delete Question
+
+# AI Usage:
+
+Free-tier GitHub Copilot in VSC: 
+- Used to generate infra/ and help understand how to deploy local app to AWS using cdk deploy.
+- Used to help implement proper HTML/CSS styling (with Figma storybords as reference) for Edit Rubric and Delete Question use cases. 
+- Used to investigate bugs and syntax problems encountered while implementing Edit Rubric and Delete Question use cases.
+
 # PERN Stack Application
 
 A full-stack application built with **PostgreSQL, Express, React, and Node.js (PERN)**, using **Prisma** to access the database and **Axios** for frontend API requests.
