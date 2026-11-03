@@ -1,42 +1,100 @@
+
+import { useEffect, useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 
-const Profile = () => {
-  const { user, isAuthenticated, isLoading } = useAuth0();
+type DatabaseUser = {
+  id: number;
+  email: string;
+  name: string | null;
+  role: string;
+  auth0Id: string;
+};
+
+function Profile() {
+  const {
+    user,
+    isAuthenticated,
+    isLoading,
+    getAccessTokenSilently,
+  } = useAuth0();
+
+  const [dbUser, setDbUser] = useState<DatabaseUser | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isAuthenticated || !user?.sub) return;
+
+    let active = true;
+
+    async function syncUser() {
+      try {
+        const token = await getAccessTokenSilently();
+
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/users/sync`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`Sync failed: ${response.status}`);
+        }
+
+        const data: DatabaseUser = await response.json();
+
+        if (active) {
+          setDbUser(data);
+          setError(null);
+        }
+      } catch (err) {
+        if (active) {
+          setError(
+            err instanceof Error ? err.message : "Unknown error"
+          );
+        }
+      }
+    }
+
+    syncUser();
+
+    return () => {
+      active = false;
+    };
+  }, [isAuthenticated, user?.sub, getAccessTokenSilently]);
 
   if (isLoading) {
-    return <div className="loading-text">Loading profile...</div>;
+    return <div>Loading...</div>;
+  }
+
+  if (!isAuthenticated) {
+    return <div>Not logged in</div>;
   }
 
   return (
-    isAuthenticated && user ? (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
-        <img 
-          src={user.picture || `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='110' height='110' viewBox='0 0 110 110'%3E%3Ccircle cx='55' cy='55' r='55' fill='%2363b3ed'/%3E%3Cpath d='M55 50c8.28 0 15-6.72 15-15s-6.72-15-15-15-15 6.72-15 15 6.72 15 15 15zm0 7.5c-10 0-30 5.02-30 15v3.75c0 2.07 1.68 3.75 3.75 3.75h52.5c2.07 0 3.75-1.68 3.75-3.75V72.5c0-9.98-20-15-30-15z' fill='%23fff'/%3E%3C/svg%3E`} 
-          alt={user.name || 'User'} 
-          className="profile-picture"
-          style={{ 
-            width: '110px', 
-            height: '110px', 
-            borderRadius: '50%', 
-            objectFit: 'cover',
-            border: '3px solid #63b3ed'
-          }}
-          onError={(e) => {
-            const target = e.target as HTMLImageElement;
-            target.src = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='110' height='110' viewBox='0 0 110 110'%3E%3Ccircle cx='55' cy='55' r='55' fill='%2363b3ed'/%3E%3Cpath d='M55 50c8.28 0 15-6.72 15-15s-6.72-15-15-15-15 6.72-15 15 6.72 15 15 15zm0 7.5c-10 0-30 5.02-30 15v3.75c0 2.07 1.68 3.75 3.75 3.75h52.5c2.07 0 3.75-1.68 3.75-3.75V72.5c0-9.98-20-15-30-15z' fill='%23fff'/%3E%3C/svg%3E`;
-          }}
-        />
-        <div style={{ textAlign: 'center' }}>
-          <div className="profile-name" style={{ fontSize: '2rem', fontWeight: '600', color: '#f7fafc', marginBottom: '0.5rem' }}>
-            {user.name}
-          </div>
-          <div className="profile-email" style={{ fontSize: '1.15rem', color: '#a0aec0' }}>
-            {user.email}
-          </div>
-        </div>
-      </div>
-    ) : null
+    <div>
+      <h2>Auth0 Profile</h2>
+      <p>Email: {user?.email}</p>
+
+      <h2>Database User</h2>
+
+      {error && <p>Error: {error}</p>}
+
+      {dbUser ? (
+        <>
+          <p>ID: {dbUser.id}</p>
+          <p>Name: {dbUser.name}</p>
+          <p>Role: {dbUser.role}</p>
+          <p>Auth0 ID: {dbUser.auth0Id}</p>
+        </>
+      ) : (
+        !error && <p>Synchronizing user...</p>
+      )}
+    </div>
   );
-};
+}
 
 export default Profile;

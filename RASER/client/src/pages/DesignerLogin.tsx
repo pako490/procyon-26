@@ -2,10 +2,10 @@
 import { Navigate } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import "../App.css";
+import LoginButton from "../components/LoginButton";
 
 function DesignerLogin() {
   const {
-    loginWithRedirect,
     isAuthenticated,
     isLoading
   } = useAuth0();
@@ -22,19 +22,7 @@ function DesignerLogin() {
     <main className="designer-login">
       <section className="login-section">
         <h1>Welcome, Designer</h1>
-
-        <button
-          className="login-button"
-          onClick={() =>
-            loginWithRedirect({
-              appState: {
-                returnTo: "/your-rubrics"
-              }
-            })
-          }
-        >
-          Login with Auth0
-        </button>
+        <LoginButton/>
       </section>
     </main>
   );

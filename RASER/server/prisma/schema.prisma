@@ -1,4 +1,3 @@
-
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
@@ -9,53 +8,64 @@ datasource db {
   provider = "postgresql"
 }
 
+enum UserRole {
+  DESIGNER
+  REVIEWER
+  EDITOR
+}
+
 model User {
-  id    Int    @id @default(autoincrement())
-  name  String
-  email String @unique
+  id      Int      @id @default(autoincrement())
+  name    String
+  email   String   @unique
+  auth0Id String?  @unique
+  role    UserRole @default(REVIEWER)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Rubric {
-    id Int @id @default(autoincrement())
-    assignedDesignerId Int?
-    title String
-    publishDate DateTime?
-    deprecationDate DateTime? 
-    replacementRubricId Int?
-    maxScoreComputed Int?
-    lowQualThreshold Int?
-    highQualThreshold Int?
-    sampleURL String?
-    
-    sections Section[]
+  id                  Int       @id @default(autoincrement())
+  assignedDesignerId  Int?
+  title               String
+  publishDate         DateTime?
+  deprecationDate     DateTime?
+  replacementRubricId Int?
+  maxScoreComputed    Int?
+  lowQualThreshold    Int?
+  highQualThreshold   Int?
+  sampleURL           String?
+
+  sections Section[]
 }
 
 model Section {
-    id Int @id @default(autoincrement())
-    heading String
-    assignedRubricId Int 
-    questions Question[]
-    
-    rubric Rubric @relation(fields: [assignedRubricId], references: [id])
+  id               Int        @id @default(autoincrement())
+  heading          String
+  assignedRubricId Int
+  questions        Question[]
+
+  rubric Rubric @relation(fields: [assignedRubricId], references: [id])
 }
 
 model Question {
-    id Int @id @default(autoincrement())
-    question String
-    criteria String
-    rating1Description String @default("")
-    rating2Description String @default("")
-    rating3Description String @default("")
-    rating4Description String @default("")
-    rating5Description String @default("")
-    assignedSectionId Int
+  id                 Int    @id @default(autoincrement())
+  question           String
+  criteria           String
+  rating1Description String @default("")
+  rating2Description String @default("")
+  rating3Description String @default("")
+  rating4Description String @default("")
+  rating5Description String @default("")
+  assignedSectionId  Int
 
-    section Section @relation(fields: [assignedSectionId], references: [id])
+  section Section @relation(fields: [assignedSectionId], references: [id])
 }
 
 model RubricDesigner {
-    designerId Int @id @default(autoincrement())
-    name String
-    email String 
-    password String
+  designerId Int    @id @default(autoincrement())
+  name       String
+  email      String
+  password   String
 }

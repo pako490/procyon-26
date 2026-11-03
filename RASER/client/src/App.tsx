@@ -23,11 +23,9 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Public Routes */}
         <Route path="/" element={<HomePage />} />
         <Route path="/designer-login" element={<DesignerLogin />} />
 
-        {/* Protected Routes */}
         <Route element={<ProtectedRoute />}>
           <Route path="/your-rubrics" element={<YourRubrics />} />
           <Route
@@ -36,7 +34,7 @@ function App() {
           />
         </Route>
 
-        {/* Fallback */}
+        {/*Default Routes */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

@@ -4,7 +4,15 @@ const LoginButton = () => {
   const { loginWithRedirect } = useAuth0();
   return (
     <button 
-      onClick={() => loginWithRedirect()} 
+      onClick={() => loginWithRedirect({
+                  authorizationParams: {
+            connection: "Username-Password-Authentication",
+          },
+          appState: {
+            returnTo: "/your-rubrics",
+          },
+        })
+      }
       className="button login"
     >
       Log In
