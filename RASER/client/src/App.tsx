@@ -5,55 +5,41 @@ import HomePage from "./pages/HomePage";
 import DesignerLogin from "./pages/DesignerLogin";
 import YourRubrics from "./pages/YourRubrics";
 import EditRubric from "./components/EditRubric";
+import ProtectedRoute from "./components/ProtectedRoute";
 
+import { useAuth0 } from "@auth0/auth0-react";
 
 function App() {
+  const { isLoading, error } = useAuth0();
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Authentication Error: {error.message}</div>;
+  }
 
   return (
-    <>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/designer-login" element={<DesignerLogin />} />
+    <BrowserRouter>
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/" element={<HomePage />} />
+        <Route path="/designer-login" element={<DesignerLogin />} />
+
+        {/* Protected Routes */}
+        <Route element={<ProtectedRoute />}>
           <Route path="/your-rubrics" element={<YourRubrics />} />
-          <Route path="/your-rubrics/:rubricId/edit" element={<EditRubric />} />
-          <Route path="*" element={<Navigate to="/" />} />
-        </Routes>
-      </BrowserRouter>
+          <Route
+            path="/your-rubrics/:rubricId/edit"
+            element={<EditRubric />}
+          />
+        </Route>
 
-      {/* <div>
-        <h1>User Management</h1>
-
-        {error && <p role="alert">{error}</p>}
-
-        <input
-          type="text"
-          placeholder="Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-
-        <button onClick={addUser}>Add User</button>
-
-        <h2>Users</h2>
-
-        <ul>
-          {users.map((user) => (
-            <li key={user.id}>
-              {user.name} ({user.email})
-            </li>
-          ))}
-        </ul>
-      </div> */}
-
-    </>
+        {/* Fallback */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 

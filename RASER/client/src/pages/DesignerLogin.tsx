@@ -1,54 +1,43 @@
-import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+
+import { Navigate } from "react-router-dom";
+import { useAuth0 } from "@auth0/auth0-react";
 import "../App.css";
 
 function DesignerLogin() {
-    const navigate = useNavigate();
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [error, setError] = useState("");
+  const {
+    loginWithRedirect,
+    isAuthenticated,
+    isLoading
+  } = useAuth0();
 
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
-        // authentication not implemented yet
-    
-        if (!email.trim() || !password.trim()) {
-            setError("Please enter your email and password.");
-            return;
-        }
+  if (isAuthenticated) {
+    return <Navigate to="/your-rubrics" replace />;
+  }
 
-        navigate("/your-rubrics");
-    }
+  return (
+    <main className="designer-login">
+      <section className="login-section">
+        <h1>Welcome, Designer</h1>
 
-    return (
-        <main className="designer-login">
-            <section className="login-section">
-                <h1>Welcome, Designer</h1>
-
-                <form onSubmit={handleSubmit}>
-                    <input
-                        type="email"
-                        id="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="Enter Email"
-                        required
-                    />
-                    
-                    <input
-                        type="password"
-                        id="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        placeholder="Enter Password"
-                        required
-                    />
-                    <button className="login-button" type="submit">Login</button>
-                </form>
-            </section>
-        </main>
-    )
+        <button
+          className="login-button"
+          onClick={() =>
+            loginWithRedirect({
+              appState: {
+                returnTo: "/your-rubrics"
+              }
+            })
+          }
+        >
+          Login with Auth0
+        </button>
+      </section>
+    </main>
+  );
 }
 
 export default DesignerLogin;
