@@ -62,7 +62,7 @@ export class RaserStack extends cdk.Stack {
       ),
       memorySize: 512,
       timeout: cdk.Duration.seconds(30),
-      reservedConcurrentExecutions: 10,
+      // reservedConcurrentExecutions: 10, //NOTE: ran into creation failures during deployment. . . seeing if this does anything
       vpc,
       vpcSubnets: { subnetType: ec2.SubnetType.PUBLIC },
       allowPublicSubnet: true,
@@ -74,7 +74,7 @@ export class RaserStack extends cdk.Stack {
       bundling: {
         // serverless-http's CommonJS adapter dynamically requires Node built-ins.
         banner:
-          'import { createRequire } from "node:module"; globalThis.require = createRequire(import.meta.url);',
+          "import { createRequire } from 'node:module'; globalThis.require = createRequire(import.meta.url);",
         format: nodejs.OutputFormat.ESM,
         target: "node22",
       },
