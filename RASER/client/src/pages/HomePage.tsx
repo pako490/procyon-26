@@ -12,7 +12,7 @@ function HomePage() {
                         Log in as an Editor
                     </Link>
                     <Link to="/designer-login" className="login-button">
-                        Log in as an Designer
+                        Log in as a Designer
                     </Link>
                     <Link to="/register-user" className="login-button">
                         Register as a New User
