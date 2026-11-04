@@ -16,6 +16,9 @@ interface RaserStackProps extends cdk.StackProps {
   vpcId: string;
   databaseSecurityGroupId: string;
   databaseSecretName: string;
+  auth0DomainSecretName: string;
+  auth0AudienceSecretName: string; 
+  auth0IssuerBaseUrlSecretName: string;
 }
 
 export class RaserStack extends cdk.Stack {
@@ -45,12 +48,26 @@ export class RaserStack extends cdk.Stack {
       ec2.Port.tcp(5432),
       "Allow the application Lambda to connect to PostgreSQL",
     );
-
     const databaseSecret = secretsmanager.Secret.fromSecretNameV2(
       this,
       "DatabaseUrlSecret",
       props.databaseSecretName,
     );
+    const auth0DomainSecret = secretsmanager.Secret.fromSecretNameV2(
+      this,
+      "Auth0DomainSecret",
+      props.auth0DomainSecretName,
+    );
+    const auth0AudienceSecret = secretsmanager.Secret.fromSecretNameV2(
+      this, 
+      "Auth0AudienceSecret",
+      props.auth0AudienceSecretName,
+    );
+    const auth0IssuerBaseUrlSecret = secretsmanager.Secret.fromSecretNameV2(
+      this, 
+      "Auth0IssuerBaseUrlSecret",
+      props.auth0IssuerBaseUrlSecretName,
+    )
     const apiFunction = new nodejs.NodejsFunction(this, "ApiFunction", {
       entry: path.resolve(__dirname, "../../server/src/lambda.ts"),
       handler: "handler",
@@ -68,6 +85,9 @@ export class RaserStack extends cdk.Stack {
       allowPublicSubnet: true,
       securityGroups: [lambdaSecurityGroup],
       environment: {
+        AUTH0_DOMAIN: auth0DomainSecret.secretValue.unsafeUnwrap(),
+        AUTH0_AUDIENCE: auth0AudienceSecret.secretValue.unsafeUnwrap(),
+        AUTH0_ISSUER_BASE_URL: auth0IssuerBaseUrlSecret.secretValue.unsafeUnwrap(),
         DATABASE_URL: databaseSecret.secretValue.unsafeUnwrap(),
         CORS_ORIGIN: "*",
       },

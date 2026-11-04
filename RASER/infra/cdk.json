@@ -4,6 +4,9 @@
     "region": "us-east-2",
     "vpcId": "vpc-0389a577ebab17a70",
     "databaseSecurityGroupId": "sg-030a3715755c30d4e",
-    "databaseSecretName": "raser/prod/database-url"
+    "databaseSecretName": "raser/prod/database-url",
+    "auth0DomainSecretName": "/raser/auth/domain",
+    "auth0AudienceSecretName": "raser/auth/audience",
+    "auth0IssuerBaseUrlSecretName": "raser/auth/issuerBaseUrl"
   }
 }

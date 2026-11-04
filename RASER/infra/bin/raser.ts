@@ -7,6 +7,9 @@ const region = app.node.tryGetContext("region");
 const vpcId = app.node.tryGetContext("vpcId");
 const databaseSecurityGroupId = app.node.tryGetContext("databaseSecurityGroupId");
 const databaseSecretName = app.node.tryGetContext("databaseSecretName");
+const auth0DomainSecretName = app.node.tryGetContext('auth0DomainSecretName');
+const auth0AudienceSecretName = app.node.tryGetContext('auth0AudienceSecretName')
+const auth0IssuerBaseUrlSecretName = app.node.tryGetContext('auth0IssuerBaseUrlSecretName');
 
 if (!region || !vpcId || !databaseSecurityGroupId || !databaseSecretName) {
   throw new Error(
@@ -22,4 +25,7 @@ new RaserStack(app, "RaserStack", {
   vpcId,
   databaseSecurityGroupId,
   databaseSecretName,
+  auth0DomainSecretName,
+  auth0AudienceSecretName,
+  auth0IssuerBaseUrlSecretName
 });
