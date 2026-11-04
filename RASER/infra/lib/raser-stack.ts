@@ -97,8 +97,28 @@ export class RaserStack extends cdk.Stack {
           "import { createRequire } from 'node:module'; globalThis.require = createRequire(import.meta.url);",
         format: nodejs.OutputFormat.ESM,
         target: "node22",
-      },
-    });
+
+        commandHooks: {
+          beforeBundling(_inputDir, _outputDir) {
+            return [];
+          },
+      
+          beforeInstall(_inputDir, _outputDir) {
+            return [];
+          },
+      
+          afterBundling(_inputDir, outputDir) {
+            return [
+              `mkdir -p "${outputDir}/certs"`,
+              `cp "${path.resolve(
+                __dirname,
+                "../../server/certs/us-east-2-bundle.pem",
+              )}" "${outputDir}/certs/us-east-2-bundle.pem"`,
+            ];
+          },
+        },
+      }, 
+  });
 
     const api = new apigateway.HttpApi(this, "ApplicationApi");
     const integration = new integrations.HttpLambdaIntegration(
