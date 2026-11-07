@@ -36,6 +36,7 @@ model Rubric {
   lowQualThreshold    Int?
   highQualThreshold   Int?
   sampleURL           String?
+  assignedJournalIds  Int[]     @default([])
 
   sections Section[]
 }

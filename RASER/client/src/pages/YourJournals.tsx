@@ -12,9 +12,6 @@ function YourJournals() {
             <section className="editor-card">
                 <header className="editor-page-header">
                     <h1>Your Journals</h1>
-                    <button type="button" className="secondary-button">
-                        View All Published Rubrics
-                    </button>
                 </header>
                 <RegisterJournal onJournalRegistered={() => tableRef.current?.refresh()} />
                 <JournalTable ref={tableRef} />
