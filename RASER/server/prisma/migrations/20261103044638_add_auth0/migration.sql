@@ -10,4 +10,8 @@ DROP INDEX "User_auth0Id_key";
 
 -- AlterTable
 ALTER TABLE "User" DROP COLUMN "auth0Id",
-ADD COLUMN     "passwordHash" TEXT NOT NULL;
+ADD COLUMN     "passwordHash" TEXT;
+
+UPDATE "User" SET "passwordHash" = '' WHERE "passwordHash" IS NULL;
+
+ALTER TABLE "User" ALTER COLUMN "passwordHash" SET NOT NULL;

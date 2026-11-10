@@ -36,8 +36,15 @@ model Rubric {
   lowQualThreshold    Int?
   highQualThreshold   Int?
   sampleURL           String?
+  assignedJournalIds  Int[]     @default([])
 
   sections Section[]
+}
+
+model Journal {
+  id               Int    @id @default(autoincrement())
+  assignedEditorId Int?
+  name             String
 }
 
 model Section {
@@ -68,4 +75,11 @@ model RubricDesigner {
   name       String
   email      String
   password   String
+}
+
+model JournalEditor {
+  editorId Int    @id @default(autoincrement())
+  name     String
+  email    String
+  password String
 }

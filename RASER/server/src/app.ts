@@ -3,6 +3,7 @@ import cors from "cors";
 import rubricsRoutes from "./routes/rubrics.js";
 import questionRoutes from "./routes/question.js";
 import userRoutes from "./routes/users.js";
+import journalRoutes from "./routes/journals.js"
 
 const app = express();
 
@@ -13,5 +14,6 @@ app.use(userRoutes);
 app.use("/api/rubrics", rubricsRoutes);
 app.use("/api/question", questionRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/journals", journalRoutes)
 
 export default app;
