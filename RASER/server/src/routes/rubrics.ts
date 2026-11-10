@@ -183,7 +183,7 @@ router.get("/list", async (req, res) => {
         return res.status(200).json(rubrics);
     } catch (error) {
         console.error(error);
-        return res.status(500).json({error: "Failed to retreieve rubrics"});
+        return res.status(500).json({error: "Failed to retrieve rubrics"});
 
     }
 });
