@@ -289,11 +289,111 @@ input, textarea {
   text-align: right;
 }
 
-.edit-rubric-sections { text-align: center; }
-.edit-rubric-section-heading th { background: #dedede; }
+/* Shared rubric grid (view and edit pages) */
+.rubric-grid {
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+  text-align: center;
+  color: #111;
+}
+
+.rubric-grid th, .rubric-grid td {
+  padding: 12px;
+  vertical-align: top;
+  border-right: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+}
+
+.rubric-grid th:last-child, .rubric-grid td:last-child { 
+  border-right: 0; 
+}
+
+.rubric-grid tbody tr:last-child > * { 
+  border-bottom: 0; 
+}
+
+.rubric-grid thead th, .view-rubric-max-score td {
+  background: #c2c2c2;
+  color: #363535;
+  font-weight: bold;
+}
+
+.rubric-grid .rubric-section-heading th {
+  background: #dedede;
+  font-size: 1rem;
+  padding: 14px;
+  color: #4f4e4e;
+}
+
+/* Edit Rubric */
 .edit-rubric-add-question td { border-bottom: 0; }
-.edit-rubric-sections td:last-child button { display: block; margin: 0 auto; }
-.edit-rubric-sections td:last-child button + button { margin: 8px auto 0; }
+.edit-rubric-sections { table-layout: fixed; }
+.edit-rubric-sections col.col-question { width: 30%; }
+.edit-rubric-sections col.col-criteria { width: 45%; }
+.edit-rubric-sections col.col-actions { width: 25%; }
+.edit-rubric-sections td { vertical-align: middle; }
+
+/* action buttons stay on one line */
+.edit-rubric-sections td:last-child { white-space: nowrap; }
+.edit-rubric-sections td:last-child button + button { margin-left: 8px; }
+
+/* View Rubric */
+.view-rubric-page {
+  text-align: left;
+  width: 100%;
+}
+
+.view-rubric-header {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: start;
+  gap: 28px;
+  margin-bottom: 24px;
+}
+
+.view-rubric-title {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.view-rubric-title h2 { 
+  font-weight: bold; 
+}
+
+/* columns: 1 = question, 2-6 = ratings, 7 = criteria */
+.view-rubric-sections {
+  table-layout: fixed;
+}
+
+.view-rubric-sections col.col-question { width: 30%; }
+
+.view-rubric-sections col.col-rating { width: 5%; }
+
+.view-rubric-sections col.col-criteria { width: 45%; }
+
+.view-rubric-sections td:nth-child(n+2):nth-child(-n+6) {
+  padding: 12px 6px;
+}
+
+.view-rubric-sections td:nth-child(7) { 
+  text-align: left; 
+}
+
+.view-rubric-max-score td:last-child { 
+  text-align: left; 
+}
+
+.view-rubric-thresholds-list { 
+  display: flex; 
+  gap: 24px; 
+  white-space: nowrap; 
+}
 
 /* Add Question popup */
 .modal-backdrop {

@@ -260,6 +260,45 @@ router.patch("/deprecate/:id", async(req, res) => {
     }
 })
 
+//================ View Published Rubric ================//
+router.get("/view/:id", async (req, res) => {
+    const id = Number(req.params.id);
+
+    if (!Number.isInteger(id) || id <= 0) {
+        return res.status(400).json({ error: "Invalid rubric ID" });
+    }
+
+    try {
+        const rubric = await prisma.rubric.findUnique({
+            where: { id },
+            include: {
+                sections: {
+                    include: {
+                        questions: { 
+                            orderBy: { id: "asc" } 
+                        }
+                    },
+                    orderBy: { id: "asc" },
+                }
+            }
+        });
+
+        if (!rubric) {
+            return res.status(404).json({ error: "Rubric not found" });
+        }
+
+        // only allow viewing of published rubrics
+        if (!rubric.publishDate) {
+            return res.status(403).json({ error: "Rubric has not been published" });
+        }
+
+        return res.status(200).json(rubric);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({error: "Failed to retrieve rubric"});
+    }
+});
+
 
 //================ Get All Rubrics (published and unpublished) ================//
 router.get("/all", async (req, res) => {

@@ -156,6 +156,7 @@ function RubricsTable({ ref }: RubricsTableProps) {
                                         >
                                             Edit
                                         </button>
+
                                         <button
                                             type="button"
                                             onClick={() => void handlePublish(rubric.id)}
@@ -163,18 +164,28 @@ function RubricsTable({ ref }: RubricsTableProps) {
                                         >
                                             {publishingId === rubric.id ? "Publishing..." : "Publish"}
                                         </button>
+
+                                        <button
+                                            type="button"
+                                            onClick={() => void handleDelete(rubric.id, rubric.title)}
+                                            disabled={deletingId !== null}
+                                            className="action-button"
+                                            style={{ backgroundColor: "#e53e3e", color: "white" }}
+                                        >
+                                            {deletingId === rubric.id ? "Deleting..." : "Delete"}
+                                        </button>
                                     </>
                                 )}
 
-                                {!rubric.publishDate && (
-                                    <button
-                                        type="button"
-                                        onClick={() => void handleDelete(rubric.id, rubric.title)}
-                                        disabled={deletingId !== null}
-                                        className="action-button"
-                                    >
-                                        {deletingId === rubric.id ? "Deleting..." : "Delete"}
-                                    </button>
+                                {rubric.publishDate && (
+                                    <>
+                                        <button
+                                            type="button"
+                                            onClick={() => navigate(`/your-rubrics/${rubric.id}/view`)}
+                                        >
+                                            View
+                                        </button>
+                                    </>
                                 )}
                             </td>
                         </tr>

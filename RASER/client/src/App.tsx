@@ -8,6 +8,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import EditorLogin from "./pages/EditorLogin";
 import YourJournals from "./pages/YourJournals";
 import JournalDashboard from "./components/JournalDashboard"
+import ViewRubric from "./components/ViewRubric";
 
 import { useAuth0 } from "@auth0/auth0-react";
 
@@ -31,6 +32,7 @@ function App() {
         <Route element={<ProtectedRoute />}>
           <Route path="/your-rubrics" element={<YourRubrics />} />
           <Route path="/your-rubrics/:rubricId/edit" element={<EditRubric />} />
+          <Route path="/your-rubrics/:rubricId/view" element={<ViewRubric />} />
         </Route>
 
         <Route path="/editor-login" element={<EditorLogin />} />
