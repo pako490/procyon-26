@@ -300,6 +300,68 @@ router.get("/your/:id", async (req, res) => {
     }
 });
 
+//================ Duplicate Rubric ================//
+router.post("/duplicate/:id", async (req, res) => {
+    const id = Number(req.params.id);
+
+    if (!Number.isInteger(id) || id <= 0) {
+        res.status(400).json({ error: "Invalid rubric ID" });
+        return;
+    }
+
+    try {
+        const source = await prisma.rubric.findUnique({
+            where: { id },
+            include: {
+                sections: {
+                    orderBy: { id: "asc" },
+                    include: { questions: { orderBy: { id: "asc" } } },
+                },
+            },
+        });
+
+        if (!source) {
+            res.status(404).json({ error: "Rubric not found" });
+            return;
+        }
+
+        // One nested write = one transaction: all of the copy is created, or none of it.
+        // Copy starts as a clean draft.
+        const copy = await prisma.rubric.create({
+            data: {
+                title: `${source.title} (Copy)`,
+                assignedDesignerId: source.assignedDesignerId,
+                lowQualThreshold: source.lowQualThreshold,
+                highQualThreshold: source.highQualThreshold,
+                maxScoreComputed: source.maxScoreComputed,
+                sampleURL: source.sampleURL,
+                sections: {
+                    create: source.sections.map((section) => ({
+                        heading: section.heading,
+                        questions: {
+                            create: section.questions.map((q) => ({
+                                question: q.question,
+                                criteria: q.criteria,
+                                rating1Description: q.rating1Description,
+                                rating2Description: q.rating2Description,
+                                rating3Description: q.rating3Description,
+                                rating4Description: q.rating4Description,
+                                rating5Description: q.rating5Description,
+                            })),
+                        },
+                    })),
+                },
+            },
+        });
+
+        res.status(201).json(copy);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Failed to duplicate rubric" });
+    }
+});
+
+
 //================ Get A Rubric for Editing ================//
 router.get("/:id", async (req, res) => {
     const id = Number(req.params.id);

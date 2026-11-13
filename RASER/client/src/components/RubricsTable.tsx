@@ -27,6 +27,7 @@ function RubricsTable({ ref }: RubricsTableProps) {
     const [loading, setLoading] = useState(false);
     const [publishingId, setPublishingId] = useState<number | null>(null);
     const [deletingId, setDeletingId] = useState<number | null>(null);
+    const [duplicatingId, setDuplicatingId] = useState<number | null>(null);
 
     // Prevent an older response from overwriting a newer view or refresh.
     const requestId = useRef(0);
@@ -101,6 +102,21 @@ function RubricsTable({ ref }: RubricsTableProps) {
         }
     }
 
+    const handleDuplicate = async (id: number) => {
+        setDuplicatingId(id);
+        setError(null);
+
+        try {
+            await api.post(`/rubrics/duplicate/${id}`);
+            await refreshRubrics();
+        } catch (err) {
+            console.error(`Failed POST /rubrics/duplicate/${id}:`, err);
+            setError(`Failed to duplicate rubric.`);
+        } finally {
+            setDuplicatingId(null);
+        }
+    }
+
     return (
         <section className="rubrics-list-section">
             <div className="rubrics-table-controls">
@@ -148,6 +164,14 @@ function RubricsTable({ ref }: RubricsTableProps) {
                             <td>{rubric.title}</td>
                             <td>{rubric.publishDate ? "Published" : "Draft"}</td>
                             <td>
+                                <button
+                                    type="button"
+                                    onClick={() => void handleDuplicate(rubric.id)}
+                                    disabled={duplicatingId !== null}
+                                >
+                                    {duplicatingId === rubric.id ? "Duplicating..." : "Duplicate"}
+                                </button>
+
                                 {!rubric.publishDate && (
                                     <>
                                         <button
@@ -163,18 +187,16 @@ function RubricsTable({ ref }: RubricsTableProps) {
                                         >
                                             {publishingId === rubric.id ? "Publishing..." : "Publish"}
                                         </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => void handleDelete(rubric.id, rubric.title)}
+                                            disabled={deletingId !== null}
+                                            className="action-button"
+                                            style={{ backgroundColor: "#e53e3e", color: "white" }}
+                                        >
+                                            {deletingId === rubric.id ? "Deleting..." : "Delete"}
+                                        </button>
                                     </>
-                                )}
-
-                                {!rubric.publishDate && (
-                                    <button
-                                        type="button"
-                                        onClick={() => void handleDelete(rubric.id, rubric.title)}
-                                        disabled={deletingId !== null}
-                                        className="action-button"
-                                    >
-                                        {deletingId === rubric.id ? "Deleting..." : "Delete"}
-                                    </button>
                                 )}
                             </td>
                         </tr>
