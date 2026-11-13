@@ -259,8 +259,11 @@ input, textarea {
 .rubrics-table-controls button.active {
   background-color: #e3e1e1;
 }
-.rubrics-table td:last-child button + button {
-  margin-left: 8px;
+.rubrics-table td:last-child button {
+  margin: 0 8px 8px 0;
+}
+.rubrics-table td:last-child {
+  padding-bottom: 6px;  
 }
 
 /* Edit Rubric */
