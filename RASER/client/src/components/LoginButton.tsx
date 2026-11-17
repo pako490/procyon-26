@@ -9,7 +9,8 @@ const LoginButton = () => {
             connection: "Username-Password-Authentication",
           },
           appState: {
-            returnTo: "/your-rubrics",
+            // redirects to login page again after signing in with Auth0 succeeds to streamline to syncing/linking page
+            returnTo: "/designer-login",
           },
         })
       }

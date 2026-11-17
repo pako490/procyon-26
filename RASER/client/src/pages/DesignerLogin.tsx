@@ -1,5 +1,5 @@
 
-import { Navigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import "../App.css";
 import LoginButton from "../components/LoginButton";
@@ -15,7 +15,19 @@ function DesignerLogin() {
   }
 
   if (isAuthenticated) {
-    return <Navigate to="/your-rubrics" replace />;
+    // after signing in with Auth0 succeeds, we must now sync the created auth0 id 
+    // with the user in the database in the Profile component
+    return (
+      <main className="designer-login">
+        <section className="login-section">
+          <h1>Welcome, Designer</h1>
+          <p>You are signed in with Auth0.</p>
+          <Link to="/profile" className="login-button">
+            Link RASER Account
+          </Link>
+        </section>
+      </main>
+    );
   }
 
   return (

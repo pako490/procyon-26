@@ -1,15 +1,14 @@
-import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
+import { Route, Routes, Navigate } from "react-router-dom";
 
 import HomePage from "./pages/HomePage";
 import DesignerLogin from "./pages/DesignerLogin";
 import YourRubrics from "./pages/YourRubrics";
 import EditRubric from "./components/EditRubric";
+import Profile from "./components/Profile";
 import ProtectedRoute from "./components/ProtectedRoute";
 import EditorLogin from "./pages/EditorLogin";
 import YourJournals from "./pages/YourJournals";
 import JournalDashboard from "./components/JournalDashboard"
-
-import { useAuth0 } from "@auth0/auth0-react";
 
 function App() {
   // const { isLoading, error } = useAuth0();
@@ -23,12 +22,12 @@ function App() {
   // }
 
   return (
-    <BrowserRouter>
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/designer-login" element={<DesignerLogin />} />
 
         <Route element={<ProtectedRoute />}>
+          <Route path="/profile" element={<Profile />} />
           <Route path="/your-rubrics" element={<YourRubrics />} />
           <Route path="/your-rubrics/:rubricId/edit" element={<EditRubric />} />
         </Route>
@@ -46,7 +45,6 @@ function App() {
         {/*Default Routes */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </BrowserRouter>
   );
 }
 
