@@ -23,6 +23,8 @@ dist/
 build/
 coverage/
 *.tsbuildinfo
+cdk.out/
+.cdk.staging/
 
 # ==========================================
 # Prisma

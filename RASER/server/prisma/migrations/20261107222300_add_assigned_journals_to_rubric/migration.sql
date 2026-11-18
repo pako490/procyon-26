@@ -1,0 +1,2 @@
+ALTER TABLE "Rubric"
+ADD COLUMN "assignedJournalIds" INTEGER[] NOT NULL DEFAULT ARRAY[]::INTEGER[];

@@ -49,6 +49,7 @@ function EditRubric() {
     const [highQualThreshold, setHighQualThreshold] = useState("");
     const [loading, setLoading] = useState(true);
     const [loadError, setLoadError] = useState<string | null>(null);
+    const [deletingId, setDeletingId] = useState<number | null>(null);
     
     // section the Add Question popup is open for, null when closed
     const [addingToSection, setAddingToSection] = useState<{ id: number; heading: string } | null>(null);
@@ -59,6 +60,9 @@ function EditRubric() {
         sectionId: number;
         heading: string;
     } | null>(null);
+
+
+
     
     const [saveMessage, setSaveMessage] = useState("");
     const saving = useRef<Promise<void>>(Promise.resolve());
@@ -90,23 +94,47 @@ function EditRubric() {
         };
     }, [rubricId]);
 
-    // validations for editing title and thresholds
-    function saveField(field: editable, value: string) {
-        const patchValue = field === "title"
-            ? value.trim()
-            : value === "" ? null : Number(value);
+    // computes max score by multiplying # of questions by 5
+    const maxScore = (rubric?.sections ?? []).reduce(
+        (total, section) => total + section.questions.length * 5,
+        0,
+    );
 
-        if (
-            (field === "title" && patchValue === "") ||
-            (field !== "title" &&
-                patchValue !== null &&
-                !Number.isInteger(patchValue))
-        ) {
-            setSaveMessage(field === "title"
-                ? "Title cannot be empty."
-                : "Thresholds must be whole numbers.");
+    // returns an error message if the threshold is invalid
+    function validateThreshold(field: "lowQualThreshold" | "highQualThreshold", value: string) {
+        const label = field === "lowQualThreshold" ? "Low" : "High";
+
+        if (value.trim() === "") {
+            return `${label} quality threshold is required.`;
+        }
+
+        const threshold = Number(value);
+
+        if (threshold < 0) {
+            return `${label} quality threshold cannot be less than 0.`;
+        }
+        if (lowQualThreshold > highQualThreshold) {
+            return "Low quality threshold cannot exceed high quality threshold.";
+        }
+        if (field === "highQualThreshold" && threshold > maxScore) {
+            return `High quality threshold cannot exceed the maximum score (${maxScore}).`;
+        }
+        return null;
+    }
+
+    // saving the editable fields
+    function saveField(field: editable, value: string) {
+        // validations for editing title and thresholds
+        const error = field === "title"
+            ? (value.trim() === "" ? "Title cannot be empty." : null)
+            : validateThreshold(field, value);
+
+        if (error) {
+            setSaveMessage(error);
             return;
         }
+
+        const patchValue = field === "title" ? value.trim() : Number(value);
 
         // edits applied in order
         saving.current = saving.current.then(async () => {
@@ -124,6 +152,19 @@ function EditRubric() {
     // return to list of rubrics
     async function returnToRubrics() {
         await saving.current;
+
+        // title and thresholds must be set before leaving a draft
+        if (!rubric?.publishDate) {
+            const error =
+                (title.trim() === "" ? "Title cannot be empty." : null) ??
+                validateThreshold("lowQualThreshold", lowQualThreshold) ??
+                validateThreshold("highQualThreshold", highQualThreshold);
+            if (error) {
+                setSaveMessage(error);
+                return;
+            }
+        }
+
         navigate("/your-rubrics");
     }
 
@@ -146,9 +187,39 @@ function EditRubric() {
         );
     }
 
+
     const sectionsByHeading = new Map(
         rubric.sections.map((section) => [section.heading, section]),
     );
+
+    const handleDelete = async (id: number) => {
+        const confirmation = window.confirm(`Delete this question? Action cannot be undone.`);
+
+        if (!confirmation) return;
+        setDeletingId(id);
+        
+        try {
+            await api.delete(`question/delete/${id}`);
+            // refresh display by copying new states for rubric/section and
+            // filtering questions whose id does not match the one that was just deleted
+            setRubric((current) => current && ({
+                ...current,
+                sections: current.sections.map((section) => ({
+                    ...section,
+                    questions: section.questions.filter(
+                        (question) => question.id !== id
+                    ),
+                })),
+            }));
+
+        } catch (error) {
+            console.error(`Failed to delete question ${id}:`, error);
+            setSaveMessage("Could not delete this question, try again.");
+        } finally {
+            setDeletingId(null);
+        }
+    }
+
 
     return (
         <main className="your-rubrics edit-rubric-page">
@@ -184,6 +255,7 @@ function EditRubric() {
                     <input
                         id="high-threshold"
                         type="text"
+                        placeholder={`0 to ${maxScore}`}
                         value={highQualThreshold}
                         disabled={Boolean(rubric.publishDate)}
                         onChange={(event) => {
@@ -201,7 +273,12 @@ function EditRubric() {
                 {saveMessage}
             </p>
 
-            <table className="rubrics-table edit-rubric-sections">
+            <table className="rubric-grid edit-rubric-sections">
+                <colgroup>
+                    <col className="col-question" />
+                    <col className="col-criteria" />
+                    <col className="col-actions" />
+                </colgroup>
                 <thead>
                     <tr>
                         <th>Question</th>
@@ -214,7 +291,7 @@ function EditRubric() {
                         const section = sectionsByHeading.get(heading);
                         return (
                             <Fragment key={heading}>
-                                <tr className="edit-rubric-section-heading">
+                                <tr className="rubric-section-heading">
                                     <th colSpan={3}>Section {index + 1}: {heading}</th>
                                 </tr>
                                 {section?.questions.map((question) => (
@@ -233,8 +310,12 @@ function EditRubric() {
                                             >
                                                 Edit
                                             </button>
-                                            <button type="button" disabled={Boolean(rubric.publishDate)}>
-                                                Delete (implement)
+                                            <button
+                                                type="button"
+                                                disabled={Boolean(rubric.publishDate)}
+                                                onClick={() => void handleDelete(question.id)}
+                                            >
+                                                {deletingId === question.id ? "Deleting..." : "Delete"}
                                             </button>
                                         </td>
                                     </tr>
