@@ -4,6 +4,7 @@ import rubricsRoutes from "./routes/rubrics.js";
 import questionRoutes from "./routes/question.js";
 import userRoutes from "./routes/users.js";
 import journalRoutes from "./routes/journals.js"
+import issueRoutes from "./routes/issues.js";
 
 const app = express();
 
@@ -15,5 +16,6 @@ app.use("/api/rubrics", rubricsRoutes);
 app.use("/api/question", questionRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/journals", journalRoutes)
+app.use("/api/issues", issueRoutes);
 
 export default app;

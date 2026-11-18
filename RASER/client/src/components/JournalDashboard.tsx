@@ -15,6 +15,13 @@ interface Rubric {
     assignedToJournal: boolean;
 }
 
+interface Issue {
+    id: number;
+    volumeNumber: number;
+    issueNumber: number;
+    journalId: number;
+}
+
 type RubricView = "assigned" | "published";
 
 function JournalDashboard() {
@@ -28,6 +35,9 @@ function JournalDashboard() {
     const [rubricsError, setRubricsError] = useState<string | null>(null);
     const [rubricsLoading, setRubricsLoading] = useState(true);
     const [updatingAssignmentId, setUpdatingAssignmentId] = useState<number | null>(null);
+    const [issues, setIssues] = useState<Issue[]>([]);
+    const [issuesError, setIssuesError] = useState<string | null>(null);
+    const [issuesSuccess, setIssuesSuccess] = useState<string | null>(null);
 
     const fetchRubrics = useCallback(async (selectedView: RubricView) => {
         if (!journalId) {
@@ -94,6 +104,67 @@ function JournalDashboard() {
         }
     };
 
+    const fetchIssues = useCallback(async () => {
+        if (!journalId) return;
+
+        try {
+            const response = await api.get<Issue[]>(`/issues/${journalId}`);
+            setIssues(response.data);
+        } catch (fetchError) {
+            console.error("Failed to load issues:", fetchError);
+            setIssuesError("Failed to load issues.");
+        }
+    }, [journalId]);
+
+    const handleAddIssue = async (evt: React.FormEvent<HTMLFormElement>) => {
+        evt.preventDefault();
+        setIssuesError(null);
+        setIssuesSuccess(null);
+
+        if (!journalId) return;
+
+        const form = evt.currentTarget;
+        const formData = new FormData(form);
+        const volumeNumber = Number(formData.get("issue-volume"));
+        const issueNumber = Number(formData.get("issue-number"));
+
+        if (
+            !Number.isInteger(volumeNumber) || volumeNumber <= 0 ||
+            !Number.isInteger(issueNumber) || issueNumber <= 0
+        ) {
+            setIssuesError("Volume and issue number must be positive whole numbers.");
+            return;
+        }
+
+        try {
+            await api.post("/issues/add", {
+                journalId: Number(journalId),
+                volumeNumber,
+                issueNumber,
+            });
+
+            form.reset();
+            setIssuesSuccess(`Added Volume ${volumeNumber}, Issue ${issueNumber}.`);
+            await fetchIssues();
+        } catch (error) {
+            console.error("Failed to add issue:", error);
+            setIssuesError("Failed to add issue.");
+        }
+    };
+
+    const handleDeleteIssue = async (issueId: number) => {
+        setIssuesError(null);
+        setIssuesSuccess(null);
+        
+        try {
+            await api.delete(`/issues/${issueId}`);
+            await fetchIssues();
+        } catch (error) {
+            console.error(`Failed to delete issue ${issueId}:`, error);
+            setIssuesError("Failed to delete issue.");
+        }
+    };
+
     useEffect(() => {
         let active = true;
         const loadJournal = async () => {
@@ -122,6 +193,10 @@ function JournalDashboard() {
     }, [journalId]);
 
     useEffect(() => {
+        void fetchIssues();
+    }, [fetchIssues]);
+
+    useEffect(() => {
         void fetchRubrics(view);
     }, [fetchRubrics, view]);
 
@@ -140,13 +215,16 @@ function JournalDashboard() {
 
                 {!loading && journal && (
                     <>
-                        <form className="issue-form" onSubmit={(event) => event.preventDefault()}>
+                        <form className="issue-form" onSubmit={(event) => void handleAddIssue(event)}>
                             <label className="visually-hidden" htmlFor="issue-volume">Issue volume number</label>
-                            <input id="issue-volume" placeholder="Enter Issue Volume Number" />
+                            <input id="issue-volume" name="issue-volume" type="number" min="1" step="1" required placeholder="Enter Issue Volume Number" />
                             <label className="visually-hidden" htmlFor="issue-number">Issue number</label>
-                            <input id="issue-number" placeholder="Enter Issue Number" />
+                            <input id="issue-number" name="issue-number" type="number" min="1" step="1" required placeholder="Enter Issue Number" />
                             <button type="submit">Add Issue</button>
                         </form>
+
+                        {issuesError && <p className="error-message" role="alert">{issuesError}</p>}
+                        {issuesSuccess && <p className="journal-status-message" role="status">{issuesSuccess}</p>}
 
                         <table className="journal-table issue-table">
                             <thead>
@@ -157,8 +235,28 @@ function JournalDashboard() {
                                     <th scope="col">Paper Actions</th>
                                 </tr>
                             </thead>
+                            <tbody>
+                                {issues.map((issue) => (
+                                    <tr key={issue.id}>
+                                        <td>Volume {issue.volumeNumber}, Issue {issue.issueNumber}</td>
+                                        <td>
+                                            <button
+                                                type="button"
+                                                className="action-button"
+                                                onClick={() => void handleDeleteIssue(issue.id)}
+                                            >
+                                                Delete
+                                            </button>
+                                        </td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                ))}
+                            </tbody>
                         </table>
-                        <p className="journal-status-message">Nothing to display. Add an issue to get started.</p>
+                        {issues.length === 0 && (
+                            <p className="journal-status-message">Nothing to display. Add an issue to get started.</p>
+                        )}
 
                         {/* Rendering for rubrics table */}
 
