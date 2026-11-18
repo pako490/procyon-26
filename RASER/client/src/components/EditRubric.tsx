@@ -113,6 +113,9 @@ function EditRubric() {
         if (threshold < 0) {
             return `${label} quality threshold cannot be less than 0.`;
         }
+        if (lowQualThreshold > highQualThreshold) {
+            return "Low quality threshold cannot exceed high quality threshold.";
+        }
         if (field === "highQualThreshold" && threshold > maxScore) {
             return `High quality threshold cannot exceed the maximum score (${maxScore}).`;
         }
