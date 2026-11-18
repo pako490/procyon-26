@@ -152,6 +152,19 @@ function JournalDashboard() {
         }
     };
 
+    const handleDeleteIssue = async (issueId: number) => {
+        setIssuesError(null);
+        setIssuesSuccess(null);
+        
+        try {
+            await api.delete(`/issues/${issueId}`);
+            await fetchIssues();
+        } catch (error) {
+            console.error(`Failed to delete issue ${issueId}:`, error);
+            setIssuesError("Failed to delete issue.");
+        }
+    };
+
     useEffect(() => {
         let active = true;
         const loadJournal = async () => {
@@ -226,7 +239,15 @@ function JournalDashboard() {
                                 {issues.map((issue) => (
                                     <tr key={issue.id}>
                                         <td>Volume {issue.volumeNumber}, Issue {issue.issueNumber}</td>
-                                        <td></td>
+                                        <td>
+                                            <button
+                                                type="button"
+                                                className="action-button"
+                                                onClick={() => void handleDeleteIssue(issue.id)}
+                                            >
+                                                Delete
+                                            </button>
+                                        </td>
                                         <td></td>
                                         <td></td>
                                     </tr>
