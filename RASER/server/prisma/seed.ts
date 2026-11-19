@@ -56,11 +56,19 @@ async function main() {
         name: "the designer",
         role: "DESIGNER" as const,
     },
+    // TODO: add other designers to Auth0
+    {
+        email: "designer2@raser.com",
+        name: "trial second designer",
+        role: "DESIGNER" as const
+    },
+    // TODO: add editor(s) to Auth0
     {
         email: "editor@raser.com",
         name: "the editor",
         role: "EDITOR" as const
-    }
+    },
+    
     ];    
 
     for (const user of users) {
