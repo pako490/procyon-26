@@ -5,6 +5,7 @@ import HomePage from "./pages/HomePage";
 import DesignerLogin from "./pages/DesignerLogin";
 import YourRubrics from "./pages/YourRubrics";
 import EditRubric from "./components/EditRubric";
+import Profile from "./components/Profile";
 import ProtectedRoute from "./components/ProtectedRoute";
 import EditorLogin from "./pages/EditorLogin";
 import YourJournals from "./pages/YourJournals";
@@ -13,7 +14,6 @@ import AuthRedirect from "./components/AuthRedirect";
 
 function App() {
   return (
-    <BrowserRouter>
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<HomePage />} />
@@ -44,7 +44,6 @@ function App() {
         {/* Default Route */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </BrowserRouter>
   );
 }
 

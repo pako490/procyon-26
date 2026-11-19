@@ -1,7 +1,10 @@
 import { Router } from "express";
+import { getDesignerId, requireDesigner, requireAuth } from "../middleware/auth.js";
 import { prisma } from "../lib/prisma.js";
 
 const router = Router();
+// ensures every route requires a signed-in designer
+router.use(requireAuth, requireDesigner);
 
 // criteria is the display string, highest rating first. ratings[0] is rating 1
 function buildCriteria(ratings: string[]) {
@@ -15,6 +18,7 @@ function buildCriteria(ratings: string[]) {
 //================ Add Question ================//
 router.post("/add", async (req, res) => {
     const { sectionId, question, ratings } = req.body;
+    const designerId = getDesignerId(req);
 
     // validate fields
     if (
@@ -46,6 +50,11 @@ router.post("/add", async (req, res) => {
             return;
         }
 
+        if (section.rubric.assignedDesignerId !== designerId) {
+            res.status(403).json({ error: "Only the rubric's designer can add questions" });
+            return;
+        }
+
         if (section.rubric.publishDate) {
             res.status(403).json({ error: "Published rubrics cannot be edited" });
             return;
@@ -74,6 +83,7 @@ router.post("/add", async (req, res) => {
 //================ Edit Question ================//
 router.post("/edit/:id", async (req, res) => {
     const id = Number(req.params.id);
+    const designerId = getDesignerId(req);
 
     // validate id
     if (!Number.isInteger(id) || id <= 0) {
@@ -110,6 +120,11 @@ router.post("/edit/:id", async (req, res) => {
             return;
         }
 
+        if (existingQuestion.section.rubric.assignedDesignerId !== designerId) {
+            res.status(403).json({ error: "Only the rubric's designer can edit questions" });
+            return;
+        }
+
         if (existingQuestion.section.rubric.publishDate) {
             res.status(403).json({ error: "Questions in published rubrics cannot be edited" });
             return;
@@ -139,6 +154,7 @@ router.post("/edit/:id", async (req, res) => {
 //================ Delete Question ================//
 router.delete("/delete/:id", async(req,res)=> {
     const id = Number(req.params.id);
+    const designerId = getDesignerId(req);
     // validate id
     if (!Number.isInteger(id) || id <= 0) {
         res.status(400).json({ error: "Invalid question ID" });
@@ -155,6 +171,11 @@ router.delete("/delete/:id", async(req,res)=> {
 
         if (!existingQuestion) {
             res.status(404).json({ error: "Question not found" });
+            return;
+        }
+
+        if (existingQuestion.section.rubric.assignedDesignerId !== designerId) {
+            res.status(403).json({ error: "Only the rubric's designer can delete questions" });
             return;
         }
 
