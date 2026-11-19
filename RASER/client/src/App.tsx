@@ -1,3 +1,4 @@
+
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 
 import HomePage from "./pages/HomePage";
@@ -7,43 +8,40 @@ import EditRubric from "./components/EditRubric";
 import ProtectedRoute from "./components/ProtectedRoute";
 import EditorLogin from "./pages/EditorLogin";
 import YourJournals from "./pages/YourJournals";
-import JournalDashboard from "./components/JournalDashboard"
-
-import { useAuth0 } from "@auth0/auth0-react";
+import JournalDashboard from "./components/JournalDashboard";
+import AuthRedirect from "./components/AuthRedirect";
 
 function App() {
-  // const { isLoading, error } = useAuth0();
-
-  // if (isLoading) {
-  //   return <div>Loading...</div>;
-  // }
-
-  // if (error) {
-  //   return <div>Authentication Error: {error.message}</div>;
-  // }
-
   return (
     <BrowserRouter>
       <Routes>
+        {/* Public Routes */}
         <Route path="/" element={<HomePage />} />
         <Route path="/designer-login" element={<DesignerLogin />} />
+        <Route path="/editor-login" element={<EditorLogin />} />
 
-        <Route element={<ProtectedRoute />}>
+        {/* Redirect users to their respective dashboard after login */}
+        <Route path="/auth-redirect" element={<AuthRedirect />} />
+
+        {/* Designer Protected Routes */}
+        <Route element={<ProtectedRoute allowedRoles={["DESIGNER"]} />}>
           <Route path="/your-rubrics" element={<YourRubrics />} />
-          <Route path="/your-rubrics/:rubricId/edit" element={<EditRubric />} />
+          <Route
+            path="/your-rubrics/:rubricId/edit"
+            element={<EditRubric />}
+          />
         </Route>
 
-        <Route path="/editor-login" element={<EditorLogin />} />
-        <Route path="/your-journals" element={<YourJournals />} />
-        <Route path="/your-journals/:journalId/dashboard" element={<JournalDashboard/>} />
-        {/* TODO: AUTH FOR EDITOR */}
-        {/* 
-                <Route element={<ProtectedRoute />}>
+        {/* Editor Protected Routes */}
+        <Route element={<ProtectedRoute allowedRoles={["EDITOR"]} />}>
           <Route path="/your-journals" element={<YourJournals />} />
-        
-        </Route> */}
+          <Route
+            path="/your-journals/:journalId/dashboard"
+            element={<JournalDashboard />}
+          />
+        </Route>
 
-        {/*Default Routes */}
+        {/* Default Route */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
