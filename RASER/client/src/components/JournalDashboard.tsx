@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../api/axios";
+import PaperModal, { type Paper } from "./PaperModal";
 import "../App.css";
 
 interface Journal {
@@ -38,6 +39,8 @@ function JournalDashboard() {
     const [issues, setIssues] = useState<Issue[]>([]);
     const [issuesError, setIssuesError] = useState<string | null>(null);
     const [issuesSuccess, setIssuesSuccess] = useState<string | null>(null);
+    const [papersByIssue, setPapersByIssue] = useState<Record<number, Paper[]>>({});
+    const [selectedPaper, setSelectedPaper] = useState<Paper | null>(null);
 
     const fetchRubrics = useCallback(async (selectedView: RubricView) => {
         if (!journalId) {
@@ -104,17 +107,60 @@ function JournalDashboard() {
         }
     };
 
+    const fetchPapers = useCallback(async (issueId: number) => {
+        try {
+            const response = await api.get<Paper[]>(`/papers/issue/${issueId}`);
+            // withdrawn papers are no longer shown on the dashboard
+            const inReview = response.data.filter((paper) => paper.status === "IN_REVIEW");
+            setPapersByIssue((current) => ({ ...current, [issueId]: inReview }));
+        } catch (fetchError) {
+            console.error(`Failed to load papers for issue ${issueId}:`, fetchError);
+            setIssuesError("Failed to load papers.");
+        }
+    }, []);
+
     const fetchIssues = useCallback(async () => {
         if (!journalId) return;
 
         try {
             const response = await api.get<Issue[]>(`/issues/${journalId}`);
             setIssues(response.data);
+            await Promise.all(response.data.map((issue) => fetchPapers(issue.id)));
         } catch (fetchError) {
             console.error("Failed to load issues:", fetchError);
             setIssuesError("Failed to load issues.");
         }
-    }, [journalId]);
+    }, [journalId, fetchPapers]);
+
+    const handleAddPaper = async (evt: React.FormEvent<HTMLFormElement>, issueId: number) => {
+        evt.preventDefault();
+        setIssuesError(null);
+        setIssuesSuccess(null);
+
+        const form = evt.currentTarget;
+        const title = String(new FormData(form).get("paper-title") ?? "").trim();
+
+        if (!title) {
+            setIssuesError("A paper name is required.");
+            return;
+        }
+
+        try {
+            await api.post("/papers/add", { issueId, title });
+            form.reset();
+            setIssuesSuccess(`Added paper "${title}".`);
+            await fetchPapers(issueId);
+        } catch (error) {
+            console.error("Failed to add paper:", error);
+            setIssuesError("Failed to add paper.");
+        }
+    };
+
+    const handlePaperWithdrawn = async (paper: Paper) => {
+        setIssuesError(null);
+        setIssuesSuccess(`Withdrew paper "${paper.title}".`);
+        await fetchPapers(paper.issueId);
+    };
 
     const handleAddIssue = async (evt: React.FormEvent<HTMLFormElement>) => {
         evt.preventDefault();
@@ -245,11 +291,51 @@ function JournalDashboard() {
                                                 className="action-button"
                                                 onClick={() => void handleDeleteIssue(issue.id)}
                                             >
-                                                Delete
+                                                Delete Issue
                                             </button>
+                                            <form
+                                                className="paper-form"
+                                                onSubmit={(event) => void handleAddPaper(event, issue.id)}
+                                            >
+                                                <label className="visually-hidden" htmlFor={`paper-title-${issue.id}`}>
+                                                    Paper name
+                                                </label>
+                                                <input
+                                                    id={`paper-title-${issue.id}`}
+                                                    name="paper-title"
+                                                    type="text"
+                                                    required
+                                                    placeholder="Enter Paper Name"
+                                                />
+                                                <button type="submit" className="action-button">Add Paper</button>
+                                            </form>
                                         </td>
-                                        <td></td>
-                                        <td></td>
+                                        <td>
+                                            {(papersByIssue[issue.id] ?? []).length === 0 ? (
+                                                <span className="journal-status-message">Add a paper to get started.</span>
+                                            ) : (
+                                                <ul className="paper-list">
+                                                    {papersByIssue[issue.id].map((paper) => (
+                                                        <li key={paper.id}>{paper.title}</li>
+                                                    ))}
+                                                </ul>
+                                            )}
+                                        </td>
+                                        <td>
+                                            <ul className="paper-list">
+                                                {(papersByIssue[issue.id] ?? []).map((paper) => (
+                                                    <li key={paper.id}>
+                                                        <button
+                                                            type="button"
+                                                            className="action-button"
+                                                            onClick={() => setSelectedPaper(paper)}
+                                                        >
+                                                            View Details
+                                                        </button>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -346,6 +432,14 @@ function JournalDashboard() {
                     </>
                 )}
             </section>
+
+            {selectedPaper && (
+                <PaperModal
+                    paper={selectedPaper}
+                    onWithdrawn={(paper) => void handlePaperWithdrawn(paper)}
+                    onClose={() => setSelectedPaper(null)}
+                />
+            )}
         </main>
     );
 }

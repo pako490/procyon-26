@@ -611,3 +611,63 @@ body { overflow-y: auto; }
   .issue-form { grid-template-columns: 1fr auto; }
   .issue-form button { grid-column: 2; grid-row: 1 / span 2; }
 }
+/* papers inside an issue row */
+.paper-form {
+  display: grid;
+  gap: 6px;
+}
+.paper-form input { text-align: center; }
+
+/* every action button in the issue table fills its column */
+.issue-table td .action-button {
+  display: block;
+  width: 100%;
+  margin: 0;
+}
+/* space between stacked controls in a cell (Delete Issue, then the Add Paper form) */
+.issue-table td > * + * { margin-top: 8px; }
+
+.paper-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+/* same height as the action buttons so titles line up with their View Details button */
+.paper-list li {
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* paper popup: wider so the reviewers table fits */
+.modal--wide { max-width: 760px; }
+
+/* reviewers inside the paper popup */
+.reviewer-panel { display: grid; gap: 10px; }
+.reviewer-panel h3 { margin: 8px 0 0; font-size: 16px; }
+
+.reviewer-form {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
+.reviewer-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  table-layout: fixed;
+}
+.reviewer-table th, .reviewer-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #ccc;
+  overflow-wrap: anywhere;
+}
+.reviewer-empty { text-align: center; font-style: italic; }
+
+@media (max-width: 600px) {
+  .reviewer-form { grid-template-columns: 1fr; }
+}
