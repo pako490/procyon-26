@@ -9,8 +9,10 @@ import Profile from "./components/Profile";
 import ProtectedRoute from "./components/ProtectedRoute";
 import EditorLogin from "./pages/EditorLogin";
 import YourJournals from "./pages/YourJournals";
-import JournalDashboard from "./components/JournalDashboard";
+import JournalDashboard from "./components/JournalDashboard";import ViewRubric from "./components/ViewRubric";
+
 import AuthRedirect from "./components/AuthRedirect";
+import { useAuth0 } from "@auth0/auth0-react";
 
 function App() {
   return (
@@ -26,10 +28,8 @@ function App() {
         {/* Designer Protected Routes */}
         <Route element={<ProtectedRoute allowedRoles={["DESIGNER"]} />}>
           <Route path="/your-rubrics" element={<YourRubrics />} />
-          <Route
-            path="/your-rubrics/:rubricId/edit"
-            element={<EditRubric />}
-          />
+          <Route path="/your-rubrics/:rubricId/edit" element={<EditRubric />} />
+          <Route path="/your-rubrics/:rubricId/view" element={<ViewRubric />} />
         </Route>
 
         {/* Editor Protected Routes */}

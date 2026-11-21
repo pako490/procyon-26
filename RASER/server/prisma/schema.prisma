@@ -45,6 +45,18 @@ model Journal {
   id               Int    @id @default(autoincrement())
   assignedEditorId Int?
   name             String
+
+  issues           Issue[]
+}
+
+model Issue {
+  id               Int    @id @default(autoincrement())
+  assignedEditorId Int?
+  volumeNumber     Int
+  issueNumber      Int
+  journalId        Int
+
+  journal Journal @relation(fields: [journalId], references: [id])
 }
 
 model Section {

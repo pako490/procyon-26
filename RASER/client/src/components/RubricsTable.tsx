@@ -28,6 +28,7 @@ function RubricsTable({ ref }: RubricsTableProps) {
     const [loading, setLoading] = useState(false);
     const [publishingId, setPublishingId] = useState<number | null>(null);
     const [deletingId, setDeletingId] = useState<number | null>(null);
+    const [duplicatingId, setDuplicatingId] = useState<number | null>(null);
     const [deprecatingId, setDeprecatingId] = useState<number | null>(null);
 
     // Prevent an older response from overwriting a newer view or refresh.
@@ -102,6 +103,21 @@ function RubricsTable({ ref }: RubricsTableProps) {
             setDeletingId(null);
         }
     }
+
+    const handleDuplicate = async (id: number) => {
+        setDuplicatingId(id);
+        setError(null);
+
+        try {
+            await api.post(`/rubrics/duplicate/${id}`);
+            await refreshRubrics();
+        } catch (err) {
+            console.error(`Failed POST /rubrics/duplicate/${id}:`, err);
+            setError(`Failed to duplicate rubric.`);
+        } finally {
+            setDuplicatingId(null);
+        }
+    }
     
     const handleDeprecate = async(id: number, title: string) => {
         const confirmation = window.confirm(`Deprectead rubric ${title}? Action cannot be undone.`);
@@ -170,6 +186,14 @@ function RubricsTable({ ref }: RubricsTableProps) {
                             <td>{rubric.title}</td>
                             <td>{rubric.deprecationDate ? "Deprecated" : rubric.publishDate ? "Published" : "Draft"}</td>
                             <td>
+                                <button
+                                    type="button"
+                                    onClick={() => void handleDuplicate(rubric.id)}
+                                    disabled={duplicatingId !== null}
+                                >
+                                    {duplicatingId === rubric.id ? "Duplicating..." : "Duplicate"}
+                                </button>
+
                                 {!rubric.publishDate && (
                                     <>
                                         <button
@@ -178,6 +202,7 @@ function RubricsTable({ ref }: RubricsTableProps) {
                                         >
                                             Edit
                                         </button>
+
                                         <button
                                             type="button"
                                             onClick={() => void handlePublish(rubric.id)}
