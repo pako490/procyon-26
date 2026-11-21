@@ -290,11 +290,18 @@ router.patch("/deprecate/:id", async(req, res) => {
         return res.status(400).json({ error: "Invalid rubric ID" });
     }
 
+
     try {
         const existingRubric = await prisma.rubric.findUnique({ where: { id } });
         if (!existingRubric) {
             return res.status(404).json({ error: "Rubric not found" });
         }
+        if (!existingRubric.publishDate) {
+            return res.status(400).json({
+                error: "Only published rubrics can be deprecated",
+            });
+        }
+    
         if (existingRubric.assignedDesignerId !== designerId) {
             return res.status(403).json({ error: "Only the rubric's designer can deprecate it" });
         }
