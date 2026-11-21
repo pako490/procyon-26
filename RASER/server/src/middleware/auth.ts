@@ -26,7 +26,7 @@ export const checkJwt = auth({
     audience: auth0Audience,
     issuerBaseURL: `https://${auth0Domain}`,
     tokenSigningAlg: "RS256",
-  });
+});
 
 // verifies token's sub against row in db that contains that authOId to make sure it has a DESIGNER role
 export const requireDesigner: RequestHandler = async (req, res, next) => {

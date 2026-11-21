@@ -48,7 +48,7 @@ export function useCurrentUser() {
 
             // Synchronize Auth0 user with PostgreSQL
             const response = await fetch(
-            `${import.meta.env.VITE_API_URL}/api/users/sync`,
+            `${import.meta.env.VITE_API_URL}/users/sync`,
             {
                 method: "POST",
                 headers: {
