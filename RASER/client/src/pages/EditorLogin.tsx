@@ -16,7 +16,7 @@ function EditorLogin() {
     }
 
     if (isAuthenticated) {
-        return <Navigate to="/your-journals" replace />;
+        return <Navigate to="/auth-redirect" replace />;
     }
 
     return (
