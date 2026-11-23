@@ -106,6 +106,32 @@ input, textarea {
   cursor: pointer;
 }
 
+/* add logout button CSS so it's not so glaring */
+
+.logout-button {
+  background-color: transparent;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 8px 16px;
+
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+
+  box-shadow: none;
+  transition: background-color 0.2s ease;
+}
+
+.logout-button:hover {
+  background-color: #f3f4f6;
+}
+
+.logout-button:focus-visible {
+  outline: 2px solid #374151;
+  outline-offset: 2px;
+}
+
 /* Your Rubrics */
 .your-rubrics {
   width: 100%;

@@ -13,10 +13,10 @@ router.post("/sync", requireAuth, async (req, res) => {
 
     const auth0Id = claims?.sub;
     const email = claims?.[`${namespace}/email`];
-    const emailVerified =
-        claims?.[`${namespace}/email_verified`];
+    // const emailVerified =
+    //     claims?.[`${namespace}/email_verified`];
 
-    if (!auth0Id) {
+    if (typeof auth0Id !== "string" || !auth0Id) {
         return res.status(401).json({
         error: "Invalid Auth0 identity",
         });
@@ -36,11 +36,13 @@ router.post("/sync", requireAuth, async (req, res) => {
     //verifies email
     if (
         typeof email !== "string" ||
-        !email ||
-        emailVerified !== true
+        !email 
+        // || emailVerified !== true
     ) {
         return res.status(403).json({
-        error: "Verified email required",
+        // error: "Verified email required",
+        error: "Email required"
+
         });
     }
 
@@ -65,15 +67,32 @@ router.post("/sync", requireAuth, async (req, res) => {
     }
 
     
-    const updatedUser = await prisma.user.update({
+    const linkedUserCount = await prisma.user.updateMany({
         where: {
-        id: seededUser.id,
-        auth0Id: null,
+            id: seededUser.id,
+            auth0Id: null,
         },
-        data: {
-        auth0Id,
-        },
+        data: { auth0Id },
     });
+    if (linkedUserCount.count === 0) {
+        const alreadyLinkedUser = await prisma.user.findUnique({
+            where: { auth0Id },
+        });
+        if (alreadyLinkedUser) {
+            return res.status(200).json(alreadyLinkedUser);
+        }
+
+        return res.status(409).json({
+            error: "User already linked to an Auth0 account",
+        });
+    }
+
+    const updatedUser = await prisma.user.findUnique({
+        where: { id: seededUser.id },
+    });
+    if (!updatedUser) {
+        throw new Error("Linked user could not be retrieved");
+    }
 
     return res.status(200).json(updatedUser);
 

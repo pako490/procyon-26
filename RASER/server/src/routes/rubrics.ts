@@ -1,7 +1,10 @@
 import { Router } from "express";
+import { getDesignerId, requireDesigner, requireAuth } from "../middleware/auth.js";
 import { prisma } from "../lib/prisma.js";
 
 const router = Router();
+// ensures every route needs a signed-in designer
+router.use(requireAuth, requireDesigner);
 
 const rubricSectionHeadings = [
     "Introduction",
@@ -14,6 +17,7 @@ const rubricSectionHeadings = [
 //================ Create Rubric (just title)================//
 router.post("/create", async (req, res) => {
     const { title } = req.body;
+    const designerId = getDesignerId(req);
 
     if (typeof title !== "string" || !title.trim()) {
         res.status(400).json({ error: "A rubric title is required" });
@@ -24,6 +28,7 @@ router.post("/create", async (req, res) => {
         const rubric = await prisma.rubric.create({
             data: {
                 title: title.trim(),
+                assignedDesignerId: designerId,
                 sections: {
                     create: rubricSectionHeadings.map((heading) => ({ heading })),
                 },
@@ -40,6 +45,7 @@ router.post("/create", async (req, res) => {
 //================ Edit Rubric (thresholds, title) ================//
 router.post("/edit/:id", async (req, res) => {
     const id = Number(req.params.id);
+    const designerId = getDesignerId(req);
 
     // validate id
     if (!Number.isInteger(id) || id <= 0) {
@@ -89,6 +95,11 @@ router.post("/edit/:id", async (req, res) => {
             return;
         }
 
+        if (existingRubric.assignedDesignerId !== designerId) {
+            res.status(403).json({ error: "Only the rubric's designer can edit it" });
+            return;
+        }
+
         if (existingRubric.publishDate) {
             res.status(403).json({ error: "Published rubrics cannot be edited" });
             return;
@@ -115,6 +126,7 @@ router.post("/edit/:id", async (req, res) => {
 //================ Delete Rubric ================//
 router.delete("/delete/:id", async (req, res) => {
     const id = Number(req.params.id);
+    const designerId = getDesignerId(req);
 
     if (!Number.isInteger(id) || id <= 0) {
         res.status(400).json({ error: "Invalid rubric ID" });
@@ -127,6 +139,15 @@ router.delete("/delete/:id", async (req, res) => {
         });
         if (!rubric) {
             res.status(404).json({ error: "Rubric not found" });
+            return;
+        }
+
+        if (rubric.assignedDesignerId !== designerId) {
+            res.status(403).json({ error: "Only the rubric's designer can delete it" });
+            return;
+        }
+        if (rubric.publishDate) {
+            res.status(403).json({ error: "Published rubrics cannot be deleted" });
             return;
         }
 
@@ -161,7 +182,7 @@ router.delete("/delete/:id", async (req, res) => {
 
 
 //================ LIST Published RUBRICS ================//
-
+// doesn't need to be scoped by designer (all designers can see all published rubrics)
 router.get("/list", async (req, res) => {
 
     try {
@@ -191,6 +212,7 @@ router.get("/list", async (req, res) => {
 
 //================ Your RUBRICS================//
 // Open up a published single rubric
+// doesn't need to be scoped by designer (all designers can see all published rubrics)
 router.get("/list/:id", async (req, res) => {
 
     const id = Number(req.params.id);
@@ -213,6 +235,9 @@ router.get("/list/:id", async (req, res) => {
         if (!rubric) {
             return res.status(404).json({ error: "Rubric not found" });
         }
+        if (!rubric.publishDate) {
+            return res.status(404).json({ error: "Published rubric not found" });
+        }
         return res.status(200).json(rubric);
     } catch (error) {
         console.error(error);
@@ -223,8 +248,24 @@ router.get("/list/:id", async (req, res) => {
 //================ Publish Rubric ================//
 router.patch("/publish/:id", async(req, res) => {
     const id = Number(req.params.id);
+    const designerId = getDesignerId(req);
+
+    if (!Number.isInteger(id) || id <= 0) {
+        return res.status(400).json({ error: "Invalid rubric ID" });
+    }
 
     try {
+        const existingRubric = await prisma.rubric.findUnique({ where: { id } });
+        if (!existingRubric) {
+            return res.status(404).json({ error: "Rubric not found" });
+        }
+        if (existingRubric.assignedDesignerId !== designerId) {
+            return res.status(403).json({ error: "Only the rubric's designer can publish it" });
+        }
+        if (existingRubric.publishDate) {
+            return res.status(403).json({ error: "Rubric is already published" });
+        }
+
         const rubric = await prisma.rubric.update({
             where: { id },
             data: {
@@ -243,8 +284,28 @@ router.patch("/publish/:id", async(req, res) => {
 router.patch("/deprecate/:id", async(req, res) => {
 
     const id = Number(req.params.id);
+    const designerId = getDesignerId(req);
+
+    if (!Number.isInteger(id) || id <= 0) {
+        return res.status(400).json({ error: "Invalid rubric ID" });
+    }
+
 
     try {
+        const existingRubric = await prisma.rubric.findUnique({ where: { id } });
+        if (!existingRubric) {
+            return res.status(404).json({ error: "Rubric not found" });
+        }
+        if (!existingRubric.publishDate) {
+            return res.status(400).json({
+                error: "Only published rubrics can be deprecated",
+            });
+        }
+    
+        if (existingRubric.assignedDesignerId !== designerId) {
+            return res.status(403).json({ error: "Only the rubric's designer can deprecate it" });
+        }
+
         const rubric = await prisma.rubric.update({
             where: {id},
             data: {
@@ -301,9 +362,17 @@ router.get("/view/:id", async (req, res) => {
 
 
 //================ Get All Rubrics (published and unpublished) ================//
+// includes that designer's rubrics and published rubrics (that all designers can see)
 router.get("/all", async (req, res) => {
+    const designerId = getDesignerId(req);
     try {
         const rubrics = await prisma.rubric.findMany({
+            where: {
+                OR: [
+                    { assignedDesignerId: designerId, publishDate: null },
+                    { publishDate: { not: null } },
+                ],
+            },
             orderBy: {
                 id: "asc"
             }
@@ -319,14 +388,14 @@ router.get("/all", async (req, res) => {
 });
 
 //================ Get MY Rubrics ================//
-router.get("/your/:id", async (req, res) => {
-
-    const id = Number(req.params.id);
+router.get("/your", async (req, res) => {
+    const designerId = getDesignerId(req);
 
     try {
         const rubrics = await prisma.rubric.findMany({
             where: {
-                assignedDesignerId: id
+                assignedDesignerId: designerId,
+                publishDate: null,
             },
             orderBy: {
                 id: "asc"
@@ -404,6 +473,7 @@ router.post("/duplicate/:id", async (req, res) => {
 //================ Get A Rubric for Editing ================//
 router.get("/:id", async (req, res) => {
     const id = Number(req.params.id);
+    const designerId = getDesignerId(req);
     if (!Number.isInteger(id) || id <= 0) {
         return res.status(400).json({ error: "Invalid rubric ID" });
     }
@@ -420,6 +490,9 @@ router.get("/:id", async (req, res) => {
         });
 
         if (!rubric) {
+            return res.status(404).json({ error: "Rubric not found" });
+        }
+        if (!rubric.publishDate && rubric.assignedDesignerId !== designerId) {
             return res.status(404).json({ error: "Rubric not found" });
         }
 

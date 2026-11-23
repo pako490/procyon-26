@@ -7,6 +7,7 @@ interface Rubric {
     id: number;
     title: string;
     publishDate: string | null;
+    deprecationDate: string | null;
 }
 
 type RubricView = "all" | "published";
@@ -28,6 +29,7 @@ function RubricsTable({ ref }: RubricsTableProps) {
     const [publishingId, setPublishingId] = useState<number | null>(null);
     const [deletingId, setDeletingId] = useState<number | null>(null);
     const [duplicatingId, setDuplicatingId] = useState<number | null>(null);
+    const [deprecatingId, setDeprecatingId] = useState<number | null>(null);
 
     // Prevent an older response from overwriting a newer view or refresh.
     const requestId = useRef(0);
@@ -116,6 +118,26 @@ function RubricsTable({ ref }: RubricsTableProps) {
             setDuplicatingId(null);
         }
     }
+    
+    const handleDeprecate = async(id: number, title: string) => {
+        const confirmation = window.confirm(`Deprectead rubric ${title}? Action cannot be undone.`);
+
+        if (!confirmation) return;
+
+        setDeprecatingId(id);
+        setError(null);
+
+        try {
+            await api.patch(`/rubrics/deprecate/${id}`);
+            await refreshRubrics();
+        } catch (err) {
+            console.error(`Failed Deprecate /rubrics/deprecate/${id}:`, err);
+            setError(`Failed to deprecate rubric ${title}.`);
+        } finally {
+            setDeprecatingId(null);
+        }
+
+    }
 
     return (
         <section className="rubrics-list-section">
@@ -162,7 +184,7 @@ function RubricsTable({ ref }: RubricsTableProps) {
                     {rubrics.map((rubric) => (
                         <tr key={rubric.id}>
                             <td>{rubric.title}</td>
-                            <td>{rubric.publishDate ? "Published" : "Draft"}</td>
+                            <td>{rubric.deprecationDate ? "Deprecated" : rubric.publishDate ? "Published" : "Draft"}</td>
                             <td>
                                 <button
                                     type="button"
@@ -188,28 +210,30 @@ function RubricsTable({ ref }: RubricsTableProps) {
                                         >
                                             {publishingId === rubric.id ? "Publishing..." : "Publish"}
                                         </button>
-
-                                        <button
-                                            type="button"
-                                            onClick={() => void handleDelete(rubric.id, rubric.title)}
-                                            disabled={deletingId !== null}
-                                            className="action-button"
-                                            style={{ backgroundColor: "#e53e3e", color: "white" }}
-                                        >
-                                            {deletingId === rubric.id ? "Deleting..." : "Delete"}
-                                        </button>
                                     </>
                                 )}
 
-                                {rubric.publishDate && (
-                                    <>
-                                        <button
-                                            type="button"
-                                            onClick={() => navigate(`/your-rubrics/${rubric.id}/view`)}
-                                        >
-                                            View
-                                        </button>
-                                    </>
+                                {!rubric.publishDate && (
+                                    <button
+                                        type="button"
+                                        onClick={() => void handleDelete(rubric.id, rubric.title)}
+                                        disabled={deletingId !== null}
+                                        className="action-button"
+                                    >
+                                        {deletingId === rubric.id ? "Deleting..." : "Delete"}
+                                    </button>
+                                )}
+                                {rubric.publishDate && !rubric.deprecationDate && (
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                        void handleDeprecate(rubric.id, rubric.title)
+                                        }
+                                        disabled={deprecatingId !== null}
+                                        className="action-button"
+                                    >
+                                        {deprecatingId === rubric.id ? "Deprecating..." : "Deprecate"}
+                                    </button>
                                 )}
                             </td>
                         </tr>
