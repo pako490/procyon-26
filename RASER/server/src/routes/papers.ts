@@ -1,13 +1,14 @@
 import { Router } from "express";
+import { getEditorId, requireAuth, requireEditor } from "../middleware/auth.js";
 import { prisma } from "../lib/prisma.js";
 
 const router = Router();
-
-// TODO: AUTH
+router.use(requireAuth, requireEditor);
 
 // Add a paper to an issue for review
 router.post("/add", async (req, res) => {
     const { issueId, title, authors } = req.body;
+    const editorId = getEditorId(req);
 
     if (!Number.isInteger(issueId) || issueId <= 0) {
         res.status(400).json({ error: "Invalid issue ID" });
@@ -25,12 +26,19 @@ router.post("/add", async (req, res) => {
     }
 
     try {
-        const issue = await prisma.issue.findUnique({
-            where: { id: issueId }
+        const issue = await prisma.issue.findFirst({
+            where: { id: issueId },
+            include: {
+                journal: { select: { assignedEditorId: true } },
+            },
         });
 
         if (!issue) {
             res.status(404).json({ error: "Issue not found" });
+            return;
+        }
+        if (issue.journal.assignedEditorId !== editorId) {
+            res.status(403).json({ error: "Only the assigned editor can manage this issue" });
             return;
         }
 
@@ -53,6 +61,7 @@ router.post("/add", async (req, res) => {
 // Get all papers for an issue (includes how many reviewers are assigned)
 router.get("/issue/:issueId", async (req, res) => {
     const issueId = Number(req.params.issueId);
+    const editorId = getEditorId(req);
 
     if (!Number.isInteger(issueId) || issueId <= 0) {
         res.status(400).json({ error: "Invalid issue ID" });
@@ -60,6 +69,21 @@ router.get("/issue/:issueId", async (req, res) => {
     }
 
     try {
+        const issue = await prisma.issue.findFirst({
+            where: { id: issueId },
+            include: {
+                journal: { select: { assignedEditorId: true } },
+            },
+        });
+        if (!issue) {
+            res.status(404).json({ error: "Issue not found" });
+            return;
+        }
+        if (issue.journal.assignedEditorId !== editorId) {
+            res.status(403).json({ error: "Only the assigned editor can view this issue" });
+            return;
+        }
+
         const papers = await prisma.paper.findMany({
             where: { issueId },
             orderBy: { id: "asc" },
@@ -81,6 +105,7 @@ router.get("/issue/:issueId", async (req, res) => {
 // Withdraw a paper from review (only allowed while no reviewers are assigned)
 router.post("/:id/withdraw", async (req, res) => {
     const paperId = Number(req.params.id);
+    const editorId = getEditorId(req);
 
     if (!Number.isInteger(paperId) || paperId <= 0) {
         res.status(400).json({ error: "Invalid paper ID" });
@@ -88,6 +113,27 @@ router.post("/:id/withdraw", async (req, res) => {
     }
 
     try {
+        const paperForEditor = await prisma.paper.findUnique({
+            where: { id: paperId },
+            include: {
+                issue: {
+                    include: {
+                        journal: { select: { assignedEditorId: true } },
+                    },
+                },
+            },
+        });
+        if (!paperForEditor) {
+            res.status(404).json({ error: "Paper not found" });
+            return;
+        }
+        if (
+            paperForEditor.issue.journal.assignedEditorId !== editorId
+        ) {
+            res.status(403).json({ error: "Only the assigned editor can withdraw this paper" });
+            return;
+        }
+
         // The rules live in the WHERE clause so the check and the update happen
         // as one atomic statement (no gap for a reviewer to be assigned in between).
         const result = await prisma.paper.updateMany({

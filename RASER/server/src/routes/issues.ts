@@ -1,11 +1,14 @@
 import { Router } from "express";
+import { getEditorId, requireAuth, requireEditor } from "../middleware/auth.js";
 import { prisma } from "../lib/prisma.js";
 
 const router = Router();
+router.use(requireAuth, requireEditor);
 
 // Create an issue (volume number and issue number) for a journal
 router.post("/add", async (req, res) => {
     const { journalId, volumeNumber, issueNumber } = req.body;
+    const editorId = getEditorId(req);
 
     if (!Number.isInteger(journalId) || journalId <= 0) {
         res.status(400).json({ error: "Invalid journal ID" });
@@ -21,8 +24,8 @@ router.post("/add", async (req, res) => {
     }
 
     try {
-        const journal = await prisma.journal.findUnique({ 
-            where: { id: journalId } 
+        const journal = await prisma.journal.findFirst({
+            where: { id: journalId, assignedEditorId: editorId },
         });
 
         if (!journal) {
@@ -34,7 +37,8 @@ router.post("/add", async (req, res) => {
             data: {
                 volumeNumber,
                 issueNumber,
-                journalId
+                journalId,
+                assignedEditorId: editorId,
             }
         });
 
@@ -48,6 +52,7 @@ router.post("/add", async (req, res) => {
 // Get all issues for a journal
 router.get("/:id", async (req, res) => {
     const journalId = Number(req.params.id);
+    const editorId = getEditorId(req);
 
     if (!Number.isInteger(journalId) || journalId <= 0) {
         res.status(400).json({ error: "Invalid journal ID" });
@@ -55,6 +60,15 @@ router.get("/:id", async (req, res) => {
     }
 
     try {
+        const journal = await prisma.journal.findFirst({
+            where: { id: journalId, assignedEditorId: editorId },
+            select: { id: true },
+        });
+        if (!journal) {
+            res.status(404).json({ error: "Journal not found" });
+            return;
+        }
+
         const issues = await prisma.issue.findMany({
             where: { journalId },
             orderBy: [{ volumeNumber: "asc" }, { issueNumber: "asc" }]
@@ -70,6 +84,7 @@ router.get("/:id", async (req, res) => {
 // Delete an issue
 router.delete("/:id", async (req, res) => {
     const issueId = Number(req.params.id);
+    const editorId = getEditorId(req);
 
     if (!Number.isInteger(issueId) || issueId <= 0) {
         res.status(400).json({ error: "Invalid issue ID" });
@@ -77,8 +92,11 @@ router.delete("/:id", async (req, res) => {
     }
 
     try {
-        const issue = await prisma.issue.findUnique({ 
-            where: { id: issueId } 
+        const issue = await prisma.issue.findFirst({
+            where: {
+                id: issueId,
+                journal: { assignedEditorId: editorId },
+            },
         });
 
         if (!issue) {
@@ -86,9 +104,7 @@ router.delete("/:id", async (req, res) => {
             return;
         }
 
-        await prisma.issue.delete({ 
-            where: { id: issueId } 
-        });
+        await prisma.issue.delete({ where: { id: issueId } });
         res.status(200).json({ message: "Issue deleted successfully" });
     } catch (error) {
         console.error(error);

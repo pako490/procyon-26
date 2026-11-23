@@ -1,13 +1,15 @@
 import { Router } from "express";
+import { getEditorId, requireAuth, requireEditor } from "../middleware/auth.js";
 import { prisma } from "../lib/prisma.js";
 
 const router = Router();
 
-// TODO: AUTH
+router.use(requireAuth, requireEditor);
 
 // Register Journal
 router.post("/register", async (req, res) => {
     const { name } = req.body;
+    const editorId = getEditorId(req);
 
     if (typeof name !== "string" || !name.trim()) {
         res.status(400).json({ error: "A journal name is required" });
@@ -16,7 +18,10 @@ router.post("/register", async (req, res) => {
 
     try {
         const journal = await prisma.journal.create({
-            data: { name: name.trim() },
+            data: {
+                name: name.trim(),
+                assignedEditorId: editorId,
+            },
         });
         res.status(201).json(journal);
     } catch (error) {
@@ -26,9 +31,11 @@ router.post("/register", async (req, res) => {
 });
 
 // Get all journals
-router.get("/all", async (_req, res) => {
+router.get("/all", async (req, res) => {
+    const editorId = getEditorId(req);
     try {
         const journals = await prisma.journal.findMany({
+            where: { assignedEditorId: editorId },
             orderBy: { id: "asc" },
         });
         res.status(200).json(journals);
@@ -41,13 +48,16 @@ router.get("/all", async (_req, res) => {
 // Show Journal Dashboard
 router.get("/dashboard/:id", async (req, res) => {
     const id = Number(req.params.id);
+    const editorId = getEditorId(req);
     if (!Number.isInteger(id) || id <= 0) {
         res.status(400).json({ error: "Invalid journal ID" });
         return;
     }
 
     try {
-        const journal = await prisma.journal.findUnique({ where: { id } });
+        const journal = await prisma.journal.findFirst({
+            where: { id, assignedEditorId: editorId },
+        });
         if (!journal) {
             res.status(404).json({ error: "Journal not found" });
             return;
@@ -62,6 +72,7 @@ router.get("/dashboard/:id", async (req, res) => {
 // List published and assigned rubrics
 router.get("/:id/rubrics", async (req, res) => {
     const journalId = Number(req.params.id);
+    const editorId = getEditorId(req);
     const view = req.query.view ?? "assigned";
 
     if (!Number.isInteger(journalId) || journalId <= 0) {
@@ -75,8 +86,8 @@ router.get("/:id/rubrics", async (req, res) => {
     }
 
     try {
-        const journal = await prisma.journal.findUnique({
-            where: { id: journalId },
+        const journal = await prisma.journal.findFirst({
+            where: { id: journalId, assignedEditorId: editorId },
             select: { id: true },
         });
         if (!journal) {
@@ -113,6 +124,7 @@ router.get("/:id/rubrics", async (req, res) => {
 router.post("/:id/assign-rubric/:rubricId", async (req, res) => {
     const journalId = Number(req.params.id);
     const rubricId = Number(req.params.rubricId);
+    const editorId = getEditorId(req);
 
     if (!Number.isInteger(journalId) || journalId <= 0) {
         res.status(400).json({ error: "Invalid journal ID" });
@@ -124,7 +136,9 @@ router.post("/:id/assign-rubric/:rubricId", async (req, res) => {
     }
 
     try {
-        const journal = await prisma.journal.findUnique({ where: { id: journalId } });
+        const journal = await prisma.journal.findFirst({
+            where: { id: journalId, assignedEditorId: editorId },
+        });
         if (!journal) {
             res.status(404).json({ error: "Journal not found" });
             return;
@@ -161,6 +175,7 @@ router.post("/:id/assign-rubric/:rubricId", async (req, res) => {
 router.delete("/:id/unassign-rubric/:rubricId", async (req, res) => {
     const journalId = Number(req.params.id);
     const rubricId = Number(req.params.rubricId);
+    const editorId = getEditorId(req);
 
     if (!Number.isInteger(journalId) || journalId <= 0) {
         res.status(400).json({ error: "Invalid journal ID" });
@@ -172,7 +187,9 @@ router.delete("/:id/unassign-rubric/:rubricId", async (req, res) => {
     }
 
     try {
-        const journal = await prisma.journal.findUnique({ where: { id: journalId } });
+        const journal = await prisma.journal.findFirst({
+            where: { id: journalId, assignedEditorId: editorId },
+        });
         if (!journal) {
             res.status(404).json({ error: "Journal not found" });
             return;
