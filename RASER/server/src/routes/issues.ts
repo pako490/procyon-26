@@ -86,9 +86,20 @@ router.delete("/:id", async (req, res) => {
             return;
         }
 
-        await prisma.issue.delete({ 
-            where: { id: issueId } 
+        const assignmentCount = await prisma.reviewAssignment.count({
+            where: { paper: { issueId } }
         });
+
+        if (assignmentCount > 0) {
+            res.status(409).json({ error: "Issue cannot be deleted because reviewers have been assigned to its papers" });
+            return;
+        }
+
+        await prisma.$transaction([
+            prisma.paper.deleteMany({ where: { issueId } }),
+            prisma.issue.delete({ where: { id: issueId } })
+        ]);
+        
         res.status(200).json({ message: "Issue deleted successfully" });
     } catch (error) {
         console.error(error);
