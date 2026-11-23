@@ -14,12 +14,19 @@ enum UserRole {
   EDITOR
 }
 
+enum PaperStatus {
+  IN_REVIEW
+  WITHDRAWN
+}
+
 model User {
   id      Int      @id @default(autoincrement())
   name    String
   email   String   @unique
   auth0Id String?  @unique
   role    UserRole @default(REVIEWER)
+
+  reviewAssignments ReviewAssignment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -57,6 +64,32 @@ model Issue {
   journalId        Int
 
   journal Journal @relation(fields: [journalId], references: [id])
+  papers  Paper[]
+}
+
+model Paper {
+  id        Int         @id @default(autoincrement())
+  title     String
+  authors   String?
+  status    PaperStatus @default(IN_REVIEW)
+  issueId   Int
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  issue             Issue              @relation(fields: [issueId], references: [id])
+  reviewAssignments ReviewAssignment[]
+}
+
+model ReviewAssignment {
+  id         Int      @id @default(autoincrement())
+  paperId    Int
+  reviewerId Int
+  createdAt  DateTime @default(now())
+
+  paper    Paper @relation(fields: [paperId], references: [id])
+  reviewer User  @relation(fields: [reviewerId], references: [id])
+
+  @@unique([paperId, reviewerId])
 }
 
 model Section {
