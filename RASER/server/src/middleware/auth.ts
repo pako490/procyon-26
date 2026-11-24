@@ -14,19 +14,43 @@ declare global {
 
 const auth0Domain = process.env.AUTH0_DOMAIN;
 const auth0Audience = process.env.AUTH0_AUDIENCE;
+const auth0BaseURL = process.env.AUTH0_ISSUER_BASE_URL;
 
 // verifies the bearer token
-export const requireAuth = auth({
-    audience: process.env.AUTH0_AUDIENCE,
-    issuerBaseURL: process.env.AUTH0_ISSUER_BASE_URL,
-    tokenSigningAlg: "RS256",
-});
+// export const requireAuth = auth({
+//     audience: auth0Audience,
+//     issuerBaseURL: auth0BaseURL,
+//     tokenSigningAlg: "RS256",
+// });
 
-export const checkJwt = auth({
+const jwtMiddleware = auth({
     audience: auth0Audience,
-    issuerBaseURL: `https://${auth0Domain}`,
+    issuerBaseURL: auth0BaseURL,
     tokenSigningAlg: "RS256",
-});
+})
+
+export const requireAuth: RequestHandler = (req, res, next) => {
+    const start = Date.now();
+
+    console.log("[AUTH] Starting JWT verification");
+
+    jwtMiddleware(req, res, (err) => {
+        console.log("[AUTH] Verification finished", {
+            duration: Date.now() - start,
+        });
+
+        if (err) {
+            console.error("[AUTH] Verification failed:", err);
+            return next(err);
+        }
+
+        console.log("[AUTH] Verification successful");
+        next();
+    });
+};
+
+export const checkJwt = requireAuth;
+
 
 // verifies token's sub against row in db that contains that authOId to make sure it has a DESIGNER role
 export const requireDesigner: RequestHandler = async (req, res, next) => {
