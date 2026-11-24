@@ -1,18 +1,18 @@
 
-import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
+import { Route, Routes, Navigate } from "react-router-dom";
 
 import HomePage from "./pages/HomePage";
 import DesignerLogin from "./pages/DesignerLogin";
 import YourRubrics from "./pages/YourRubrics";
 import EditRubric from "./components/EditRubric";
-import Profile from "./components/Profile";
+// import Profile from "./components/Profile";
 import ProtectedRoute from "./components/ProtectedRoute";
 import EditorLogin from "./pages/EditorLogin";
 import YourJournals from "./pages/YourJournals";
 import JournalDashboard from "./components/JournalDashboard";import ViewRubric from "./components/ViewRubric";
 
 import AuthRedirect from "./components/AuthRedirect";
-import { useAuth0 } from "@auth0/auth0-react";
+// import { useAuth0 } from "@auth0/auth0-react";
 
 function App() {
   return (

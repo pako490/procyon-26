@@ -3,7 +3,7 @@ import { Navigate } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import "../App.css";
 import LoginButton from "../components/LoginButton";
-import TempEditorLogin from "./TempEditorLogin";
+// import TempEditorLogin from "./TempEditorLogin";
 
 function EditorLogin() {
     const {
