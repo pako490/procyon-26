@@ -120,7 +120,7 @@ function RubricsTable({ ref }: RubricsTableProps) {
     }
     
     const handleDeprecate = async(id: number, title: string) => {
-        const confirmation = window.confirm(`Deprectead rubric ${title}? Action cannot be undone.`);
+        const confirmation = window.confirm(`Deprecate rubric ${title}? Action cannot be undone.`);
 
         if (!confirmation) return;
 

@@ -8,6 +8,7 @@ declare global {
     namespace Express {
         interface Request {
             raserDesignerId?: number;
+            raserEditorId?: number;
         }
     }
 }
@@ -64,4 +65,40 @@ export function getDesignerId(req: Request): number {
     }
 
     return req.raserDesignerId;
+}
+
+// verifies token's sub against a user row and requires the EDITOR role
+export const requireEditor: RequestHandler = async (req, res, next) => {
+    // requireAuth must run first; it populates req.auth from the verified token
+    const auth0Id = req.auth?.payload.sub;
+    if (typeof auth0Id !== "string") {
+        res.status(401).json({ error: "Invalid Auth0 identity" });
+        return;
+    }
+
+    try {
+        const user = await prisma.user.findUnique({
+            where: { auth0Id },
+            select: { id: true, role: true },
+        });
+
+        if (!user || user.role !== "EDITOR") {
+            res.status(403).json({ error: "Editor access required" });
+            return;
+        }
+
+        req.raserEditorId = user.id;
+        next();
+    } catch (error) {
+        console.error("Failed to verify editor access:", error);
+        res.status(500).json({ error: "Failed to verify editor access" });
+    }
+};
+
+export function getEditorId(req: Request): number {
+    if (typeof req.raserEditorId !== "number") {
+        throw new Error("Editor authorization middleware was not applied");
+    }
+
+    return req.raserEditorId;
 }
