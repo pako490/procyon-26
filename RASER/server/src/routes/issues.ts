@@ -104,8 +104,6 @@ router.delete("/:id", async (req, res) => {
             return;
         }
 
-        await prisma.issue.delete({ where: { id: issueId } });
-      
         const assignmentCount = await prisma.reviewAssignment.count({
             where: { paper: { issueId } }
         });
