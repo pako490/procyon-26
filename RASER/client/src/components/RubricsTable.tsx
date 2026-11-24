@@ -223,6 +223,14 @@ function RubricsTable({ ref }: RubricsTableProps) {
                                         {deletingId === rubric.id ? "Deleting..." : "Delete"}
                                     </button>
                                 )}
+                                {rubric.publishDate && (
+                                    <button
+                                        type="button"
+                                        onClick={() => navigate(`/your-rubrics/${rubric.id}/view`)}
+                                    >
+                                        View
+                                    </button>
+                                )}
                                 {rubric.publishDate && !rubric.deprecationDate && (
                                     <button
                                         type="button"
