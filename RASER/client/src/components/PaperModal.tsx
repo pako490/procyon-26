@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import api from "../api/axios";
-import ReviewerPanel from "./ReviewerPanel";
+// import ReviewerPanel from "./ReviewerPanel";
 
 export interface Paper {
     id: number;
@@ -75,7 +75,7 @@ function PaperModal({ paper, onWithdrawn, onClose }: PaperModalProps) {
 
                 {/* TODO(assign reviewer): load this paper's reviewers from the API and pass them in,
                     and pass onAssign to enable the form. Refresh the paper afterwards so reviewerCount updates. */}
-                <ReviewerPanel reviewers={[]} />
+                {/* <ReviewerPanel reviewers={[]} /> */}
 
                 {hasReviewers && (
                     <p className="modal-hint">

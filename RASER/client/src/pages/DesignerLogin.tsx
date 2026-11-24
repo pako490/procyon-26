@@ -1,5 +1,5 @@
 
-import { Link, Navigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import "../App.css";
 import LoginButton from "../components/LoginButton";

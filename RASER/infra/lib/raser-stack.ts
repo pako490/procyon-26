@@ -109,11 +109,11 @@ export class RaserStack extends cdk.Stack {
       
           afterBundling(_inputDir, outputDir) {
             return [
-              `mkdir -p "${outputDir}/certs"`,
-              `cp "${path.resolve(
+              `if not exist "${outputDir}\\certs" mkdir "${outputDir}\\certs"`,
+              `copy /Y "${path.resolve(
                 __dirname,
                 "../../server/certs/us-east-2-bundle.pem",
-              )}" "${outputDir}/certs/us-east-2-bundle.pem"`,
+              )}" "${outputDir}\\certs\\us-east-2-bundle.pem"`,
             ];
           },
         },

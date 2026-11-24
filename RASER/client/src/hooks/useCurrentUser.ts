@@ -47,14 +47,18 @@ export function useCurrentUser() {
             const token = await getAccessTokenSilently();
 
             // Synchronize Auth0 user with PostgreSQL
+            const apiBaseUrl = import.meta.env.PROD
+                ? "/api"
+                : import.meta.env.VITE_API_URL;
+
             const response = await fetch(
-            `${import.meta.env.VITE_API_URL}/users/sync`,
-            {
-                method: "POST",
-                headers: {
-                Authorization: `Bearer ${token}`,
-                },
-            }
+                `${apiBaseUrl}/users/sync`,
+                {
+                    method: "POST",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
             );
 
             if (!response.ok) {
